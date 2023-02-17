@@ -34,9 +34,7 @@ void Session::WriteToSocket(){
 
 
 void Session::WriteAllToSocket() {
-	asio::async_write(this->_socket, asio::buffer(_buf), std::bind(&Session::WriteAllCallBack, this, std::placeholders::_1, std::placeholders::_2));
-	//如下也可以
-	//_socket->async_send(asio::buffer(_buf), std::bind(&Session::WriteAllCallBack, this, std::placeholders::_1, std::placeholders::_2));
+	_socket->async_send(asio::buffer(_buf), std::bind(&Session::WriteAllCallBack, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Session::WriteAllCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred){
