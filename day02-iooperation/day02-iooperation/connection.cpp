@@ -325,9 +325,9 @@ int async_write_data() {
 		asio::ip::tcp::endpoint ep(asio::ip::address::from_string(raw_ip_address), port_num);
 		asio::io_context  iox;
 		auto socket_ptr = std::make_shared<asio::ip::tcp::socket>(iox, ep.protocol());
-		auto session_ptr = std::make_shared<Session>("Hello World!", socket_ptr);
+		auto session_ptr = std::make_shared<Session>(socket_ptr);
 		session_ptr->Connect(ep);
-		session_ptr->WriteToSocket();
+		session_ptr->WriteToSocket("Hello world");
 		iox.run();
 	}
 	catch (system::system_error& e) {
