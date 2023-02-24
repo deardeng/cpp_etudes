@@ -4,6 +4,7 @@
 #include <iostream>
 #include "MemoryPool.h"
 #include "MyObject.h"
+#include <memory>
 int main()
 {
  
@@ -33,7 +34,12 @@ int main()
 	delete p4;
 	delete p5;
 	delete p6;
-
+	std::cout << "test shared_ptr ...." << std::endl;
+	{
+		//智能指针不会触发operator delete，也不会触发operator new
+		auto shared_ptr_obj = std::make_shared<MyObject>(3);
+	}
+	
 	getchar();
 	return 0;
 }

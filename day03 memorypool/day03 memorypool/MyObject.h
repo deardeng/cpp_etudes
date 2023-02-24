@@ -18,8 +18,7 @@ public:
 	// override new and delete to use memory pool
 	void* operator new(size_t size);
 	void operator delete(void* p);
-	void* operator new[](size_t size);
-	void operator delete[](void* p);
+
 };
 
 extern MemoryPool<sizeof(MyObject), 3> gMemPool;
