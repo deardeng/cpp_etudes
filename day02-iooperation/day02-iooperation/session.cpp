@@ -104,3 +104,25 @@ void Session::ReadCallBack(const boost::system::error_code& ec, std::size_t byte
 	_recv_node = nullptr;
 	
 }
+
+void Session::ReadAllFromSocket(const std::string& buf) {
+	if (_recv_pending) {
+		return;
+	}
+	//可以调用构造函数直接构造，但不可用已经构造好的智能指针赋值
+	/*auto _recv_nodez = std::make_unique<MsgNode>(RECVSIZE);
+	_recv_node = _recv_nodez;*/
+	_recv_node = std::make_shared<MsgNode>(RECVSIZE);
+	_socket->async_receive(asio::buffer(_recv_node->_msg, _recv_node->_total_len), std::bind(&Session::ReadAllCallBack, this,
+		std::placeholders::_1, std::placeholders::_2));
+	_recv_pending = true;
+}
+
+void Session::ReadAllCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred) {
+	_recv_node->_cur_len += bytes_transferred;
+	//将数据投递到队列里交给逻辑线程处理，此处略去
+	//如果读完了则将标记置为false
+	_recv_pending = false;
+	//指针置空
+	_recv_node = nullptr;
+}

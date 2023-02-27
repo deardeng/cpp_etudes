@@ -38,6 +38,8 @@ public:
 	void WriteAllCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred);
 	void ReadFromSocket();
 	void ReadCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred);
+	void ReadAllFromSocket(const std::string& buf);
+	void ReadAllCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred);
 private:
 	std::queue<std::shared_ptr<MsgNode>> _send_queue;
 	std::shared_ptr<asio::ip::tcp::socket> _socket;
