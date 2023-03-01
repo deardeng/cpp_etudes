@@ -15,16 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AsyncClient.cpp">
+    <ClCompile Include="SyncClient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SyncTCPClient.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="SyncTCPClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
