@@ -55,6 +55,8 @@ void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_
 		cout << "read data is " << _data << endl;
 		//·¢ËÍÊý¾Ý
 		Send(_data, bytes_transferred);
+		memset(_data, 0, MAX_LENGTH);
+		_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), std::bind(&CSession::HandleRead, this, std::placeholders::_1, std::placeholders::_2));
 	}
 	else {
 		std::cout << "handle read failed, error is " << error.what() << endl;

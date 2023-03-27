@@ -6,7 +6,8 @@
 #include <mutex>
 #include <memory>
 using namespace std;
-#define MAX_LENGTH  1024
+#define MAX_LENGTH  1024*2
+#define HEAD_LENGTH 2
 using boost::asio::ip::tcp;
 class CServer;
 
@@ -14,20 +15,31 @@ class MsgNode
 {
 	friend class CSession;
 public:
-	MsgNode(char * msg, int max_len) {
-		_data = new char[max_len];
-		memcpy(_data, msg, max_len);
+	MsgNode(char * msg, short max_len):_total_len(max_len + HEAD_LENGTH),_cur_len(0){
+		_data = new char[_total_len+1]();
+		memcpy(_data, &max_len, HEAD_LENGTH);
+		memcpy(_data+ HEAD_LENGTH, msg, max_len);
+		_data[_total_len] = '\0';
+	}
+
+	MsgNode(short max_len):_total_len(max_len),_cur_len(0) {
+		_data = new char[_total_len +1]();
 	}
 
 	~MsgNode() {
 		delete[] _data;
 	}
 
+	void Clear() {
+		::memset(_data, 0, _total_len);
+		_cur_len = 0;
+	}
 private:
-	int _cur_len;
-	int _max_len;
+	short _cur_len;
+	short _total_len;
 	char* _data;
 };
+
 class CSession
 {
 public:
@@ -45,5 +57,10 @@ private:
 	CServer* _server;
 	std::queue<shared_ptr<MsgNode> > _send_que;
 	std::mutex _send_lock;
+	//收到的消息结构
+	std::shared_ptr<MsgNode> _recv_msg_node;
+	bool _b_head_parse;
+	//收到的头部结构
+	std::shared_ptr<MsgNode> _recv_head_node;
 };
 
