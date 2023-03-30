@@ -1,14 +1,16 @@
 #include "CSession.h"
 #include "CServer.h"
 #include <iostream>
+#include <iomanip>
 CSession::CSession(boost::asio::io_context& io_context, CServer* server):
 	_socket(io_context), _server(server), _b_close(false),_b_head_parse(false){
 	boost::uuids::uuid  a_uuid = boost::uuids::random_generator()();
 	_uuid = boost::uuids::to_string(a_uuid);
 	_recv_head_node = make_shared<MsgNode>(HEAD_LENGTH);
 }
+
 CSession::~CSession() {
-	cout << "~CSession destruct" << endl;
+	cout << "~CSession " << _uuid<< " destruct" << endl;
 }
 
 tcp::socket& CSession::GetSocket() {
@@ -49,6 +51,18 @@ std::shared_ptr<CSession>CSession::SharedSelf() {
 	return shared_from_this();
 }
 
+void CSession::PrintRecvData(char* data, int length) {
+	stringstream ss;
+	string result = "0x";
+	for (int i = 0; i < length; i++) {
+		string hexstr;
+		ss << hex << std::setw(2) << std::setfill('0') << int(data[i]) << endl;
+		ss >> hexstr;
+		result += hexstr;
+	}
+	std::cout << "receive raw data is : " << result << endl;;
+}
+
 void CSession::HandleWrite(const boost::system::error_code& error, std::shared_ptr<CSession> shared_self) {
 
 	if (!error) {
@@ -70,6 +84,9 @@ void CSession::HandleWrite(const boost::system::error_code& error, std::shared_p
 
 void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_transferred, std::shared_ptr<CSession> shared_self){
 	if (!error) {
+		PrintRecvData(_data, bytes_transferred);
+		std::chrono::milliseconds dura(2000);
+		std::this_thread::sleep_for(dura);
 		//已经移动的字符数
 		int copy_len = 0;
 		while (bytes_transferred>0) {

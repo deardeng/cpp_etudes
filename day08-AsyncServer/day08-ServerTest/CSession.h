@@ -52,6 +52,7 @@ public:
 	void Close();
 	std::shared_ptr<CSession> SharedSelf();
 private:
+	void PrintRecvData(char* data, int length);
 	void HandleRead(const boost::system::error_code& error, size_t  bytes_transferred, std::shared_ptr<CSession> shared_self);
 	void HandleWrite(const boost::system::error_code& error, std::shared_ptr<CSession> shared_self);
 	tcp::socket _socket;
