@@ -1,6 +1,7 @@
 #include "CSession.h"
 #include "CServer.h"
 #include <iostream>
+
 CSession::CSession(boost::asio::io_context& io_context, CServer* server):
 	_socket(io_context), _server(server), _b_close(false),_b_head_parse(false){
 	boost::uuids::uuid  a_uuid = boost::uuids::random_generator()();
@@ -26,13 +27,15 @@ void CSession::Start(){
 }
 
 void CSession::Send(char* msg, int max_length) {
-	bool pending = false;
 	std::lock_guard<std::mutex> lock(_send_lock);
-	if (_send_que.size() > 0) {
-		pending = true;
+	int send_que_size = _send_que.size();
+	if (send_que_size > MAX_SENDQUE) {
+		cout << "session: " << _uuid << " send que fulled, size is " << MAX_SENDQUE << endl;
+		return;
 	}
+
 	_send_que.push(make_shared<MsgNode>(msg, max_length));
-	if (pending) {
+	if (send_que_size>0) {
 		return;
 	}
 	auto& msgnode = _send_que.front();
@@ -93,6 +96,8 @@ void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_
 				//获取头部数据
 				short data_len = 0;
 				memcpy(&data_len, _recv_head_node->_data, HEAD_LENGTH);
+				//网络字节序转化为本地字节序
+				data_len=boost::asio::detail::socket_ops::network_to_host_short(data_len);
 				cout << "data_len is " << data_len << endl;
 				//头部长度非法
 				if (data_len > MAX_LENGTH) {
