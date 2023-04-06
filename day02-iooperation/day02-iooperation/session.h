@@ -40,10 +40,14 @@ public:
 	void ReadCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred);
 	void ReadAllFromSocket(const std::string& buf);
 	void ReadAllCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred);
+	void WriteCallBackErr(const boost::system::error_code& ec, std::size_t bytes_transferred, std::shared_ptr<MsgNode>);
+	//有隐患的发送函数，不提倡
+	void WriteToSocketErr(const std::string& buf);
 private:
 	std::queue<std::shared_ptr<MsgNode>> _send_queue;
 	std::shared_ptr<asio::ip::tcp::socket> _socket;
 	std::shared_ptr<MsgNode> _recv_node;
+	std::shared_ptr<MsgNode> _send_node;
 	bool _send_pending;
 	bool _recv_pending;
 };

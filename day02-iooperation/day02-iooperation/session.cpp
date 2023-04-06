@@ -55,10 +55,19 @@ void Session::WriteToSocket(const std::string& buf){
 	_send_pending = true;
 }
 
-//不能与上述api混用
+//不能与async_write_some混合使用
 void Session::WriteAllToSocket(const std::string& buf) {
-	
-	_socket->async_send(asio::buffer(buf), std::bind(&Session::WriteAllCallBack, this, std::placeholders::_1, std::placeholders::_2));
+	//插入发送队列
+	_send_queue.emplace(new MsgNode(buf.c_str(), buf.length()));
+	//pending状态说明上一次有未发送完的数据
+	if (_send_pending) {
+		return;
+	}
+	//异步发送数据，因为异步所以不会一下发送完
+	this->_socket->async_send(asio::buffer(buf), 
+		std::bind(&Session::WriteAllCallBack, this,
+			std::placeholders::_1, std::placeholders::_2));
+	_send_pending = true;
 }
 
 void Session::WriteAllCallBack(const boost::system::error_code& ec, std::size_t bytes_transferred){
@@ -69,8 +78,21 @@ void Session::WriteAllCallBack(const boost::system::error_code& ec, std::size_t 
 
 		return;
 	}
-		// Here we know that all the data has
-		// been written to the socket.
+	
+	//如果发送完，则pop出队首元素
+	_send_queue.pop();
+
+	//如果队列为空，则说明所有数据都发送完,将pending设置为false
+	if (_send_queue.empty()) {
+		_send_pending = false;
+	}
+	//如果队列不是空，则继续将队首元素发送
+	if (!_send_queue.empty()) {
+		auto& send_data = _send_queue.front();
+		this->_socket->async_send(asio::buffer(send_data->_msg + send_data->_cur_len, send_data->_total_len - send_data->_cur_len),
+			std::bind(&Session::WriteAllCallBack,
+				this, std::placeholders::_1, std::placeholders::_2));
+	}
 }
 
 //不考虑粘包情况， 先用固定的字节接收
@@ -125,4 +147,25 @@ void Session::ReadAllCallBack(const boost::system::error_code& ec, std::size_t b
 	_recv_pending = false;
 	//指针置空
 	_recv_node = nullptr;
+}
+
+void Session::WriteCallBackErr(const boost::system::error_code& ec, 
+	std::size_t bytes_transferred, std::shared_ptr<MsgNode> msg_node) {
+	if (bytes_transferred + msg_node->_cur_len 
+		< msg_node->_total_len) {
+		_send_node->_cur_len += bytes_transferred;
+		this->_socket->async_write_some(asio::buffer(_send_node->_msg+_send_node->_cur_len,
+			_send_node->_total_len-_send_node->_cur_len),
+			std::bind(&Session::WriteCallBackErr,
+				this, std::placeholders::_1, std::placeholders::_2, _send_node));
+	}
+}
+
+void Session::WriteToSocketErr(const std::string& buf) {
+	_send_node = make_shared<MsgNode>(buf.c_str(), buf.length());
+	//异步发送数据，因为异步所以不会一下发送完
+	this->_socket->async_write_some(asio::buffer(_send_node->_msg, 
+		_send_node->_total_len),
+		std::bind(&Session::WriteCallBackErr,
+			this, std::placeholders::_1, std::placeholders::_2, _send_node));
 }
