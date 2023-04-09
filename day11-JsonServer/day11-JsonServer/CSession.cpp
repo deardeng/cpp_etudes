@@ -157,7 +157,7 @@ void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_
 					Json::Reader reader;
 					Json::Value root;
 					reader.parse(std::string(_recv_msg_node->_data, _recv_msg_node->_total_len), root);
-					std::cout << "recevie msg id  is " << root["id"].asString() << " msg data is " 
+					std::cout << "recevie msg id  is " << root["id"].asInt() << " msg data is "
 						<< root["data"].asString() << endl;
 					root["data"] = "server has received msg, msg data is " + root["data"].asString();
 					std::string return_str = root.toStyledString();
@@ -195,7 +195,7 @@ void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_
 				Json::Reader reader;
 				Json::Value root;
 				reader.parse(std::string(_recv_msg_node->_data, _recv_msg_node->_total_len), root);
-				std::cout << "recevie msg id  is " << root["id"].asString() << " msg data is "
+				std::cout << "recevie msg id  is " << root["id"].asInt() << " msg data is "
 					<< root["data"].asString() << endl;
 				root["data"] = "server has received msg, msg data is " + root["data"].asString();
 				std::string return_str = root.toStyledString();
