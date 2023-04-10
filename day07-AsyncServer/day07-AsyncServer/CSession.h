@@ -5,6 +5,7 @@
 #include <queue>
 #include <mutex>
 #include <memory>
+#include <iostream>
 using namespace std;
 #define MAX_LENGTH  1024
 using boost::asio::ip::tcp;
@@ -28,17 +29,20 @@ private:
 	int _max_len;
 	char* _data;
 };
-class CSession
+class CSession:public std::enable_shared_from_this<CSession>
 {
 public:
 	CSession(boost::asio::io_context& io_context, CServer* server);
+	~CSession() {
+		std::cout << "Ssession destruct" << endl;
+	}
 	tcp::socket& GetSocket();
 	std::string& GetUuid();
 	void Start();
 	void Send(char* msg,  int max_length);
 private:
-	void HandleRead(const boost::system::error_code& error, size_t  bytes_transferred);
-	void HandleWrite(const boost::system::error_code& error);
+	void HandleRead(const boost::system::error_code& error, size_t  bytes_transferred, shared_ptr<CSession> _self_shared);
+	void HandleWrite(const boost::system::error_code& error, shared_ptr<CSession> _self_shared);
 	tcp::socket _socket;
 	std::string _uuid;
 	char _data[MAX_LENGTH];

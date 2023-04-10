@@ -17,7 +17,8 @@ std::string& CSession::GetUuid() {
 
 void CSession::Start(){
 	memset(_data, 0, MAX_LENGTH);
-	_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), std::bind(&CSession::HandleRead, this, std::placeholders::_1, std::placeholders::_2));
+	_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), std::bind(&CSession::HandleRead, this, 
+		std::placeholders::_1, std::placeholders::_2, shared_from_this()));
 }
 
 void CSession::Send(char* msg, int max_length) {
@@ -31,17 +32,18 @@ void CSession::Send(char* msg, int max_length) {
 		return;
 	}
 
-	boost::asio::async_write(_socket, boost::asio::buffer(msg, max_length), std::bind(&CSession::HandleWrite, this, std::placeholders::_1));
+	boost::asio::async_write(_socket, boost::asio::buffer(msg, max_length), 
+		std::bind(&CSession::HandleWrite, this, std::placeholders::_1, shared_from_this()));
 }
 
-void CSession::HandleWrite(const boost::system::error_code& error) {
+void CSession::HandleWrite(const boost::system::error_code& error, shared_ptr<CSession> _self_shared) {
 	if (!error) {
 		std::lock_guard<std::mutex> lock(_send_lock);
 		_send_que.pop();
 		if (!_send_que.empty()) {
 			auto &msgnode = _send_que.front();
 			boost::asio::async_write(_socket, boost::asio::buffer(msgnode->_data, msgnode->_max_len),
-				std::bind(&CSession::HandleWrite, this, std::placeholders::_1));
+				std::bind(&CSession::HandleWrite, this, std::placeholders::_1, _self_shared));
 		}
 	}
 	else {
@@ -50,17 +52,20 @@ void CSession::HandleWrite(const boost::system::error_code& error) {
 	}
 }
 
-void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_transferred){
+void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_transferred, shared_ptr<CSession> _self_shared){
 	if (!error) {
 
 		cout << "read data is " << _data << endl;
 		//·¢ËÍÊý¾Ý
 		Send(_data, bytes_transferred);
 		memset(_data, 0, MAX_LENGTH);
-		_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), std::bind(&CSession::HandleRead, this, std::placeholders::_1, std::placeholders::_2));
+		_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), std::bind(&CSession::HandleRead, this, 
+			std::placeholders::_1, std::placeholders::_2, _self_shared));
 	}
 	else {
 		std::cout << "handle read failed, error is " << error.what() << endl;
+
+
 		_server->ClearSession(_uuid);
 	}
 }
