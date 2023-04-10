@@ -52,6 +52,7 @@ void CSession::HandleWrite(const boost::system::error_code& error) {
 
 void CSession::HandleRead(const boost::system::error_code& error, size_t  bytes_transferred){
 	if (!error) {
+
 		cout << "read data is " << _data << endl;
 		//·¢ËÍÊý¾Ý
 		Send(_data, bytes_transferred);

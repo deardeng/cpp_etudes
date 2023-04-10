@@ -33,6 +33,7 @@ int main()
 		std::cout << "Reply is: ";
 		std::cout.write(reply, reply_length);
 		std::cout << "\n";
+		getchar();
 	}
 	catch (std::exception& e) {
 		std::cerr << "Exception: " << e.what() << endl;
