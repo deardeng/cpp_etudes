@@ -33,7 +33,4 @@
 
 Debug
 .vs
-*.vcxproj
-*.vcxproj.user
-*.vcxproj.filters
 Release
