@@ -72,17 +72,24 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\cppsoft\boost_1_81_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\cppsoft\boost_1_81_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\cppsoft\boost_1_81_0;D:\cppsoft\boost_1_81_0;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\cppsoft\boost_1_81_0\stage\lib;D:\cppsoft\boost_1_81_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\cppsoft\boost_1_81_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>D:\cppsoft\boost_1_81_0\stage\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <ExecutablePath>D:\cppsoft\boost_1_81_0;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>D:\cppsoft\boost_1_81_0\stage\lib;D:\cppsoft\boost_1_81_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\cppsoft\boost_1_81_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\cppsoft\boost_1_81_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>D:\cppsoft\boost_1_81_0\stage\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
