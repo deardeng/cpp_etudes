@@ -11,6 +11,7 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 class CServer;
+class LogicSystem;
 
 class CSession: public std::enable_shared_from_this<CSession>
 {
@@ -32,12 +33,20 @@ private:
 	char _data[MAX_LENGTH];
 	CServer* _server;
 	bool _b_close;
-	std::queue<shared_ptr<MsgNode> > _send_que;
+	std::queue<shared_ptr<SendNode> > _send_que;
 	std::mutex _send_lock;
 	//收到的消息结构
-	std::shared_ptr<MsgNode> _recv_msg_node;
+	std::shared_ptr<RecvNode> _recv_msg_node;
 	bool _b_head_parse;
 	//收到的头部结构
 	std::shared_ptr<MsgNode> _recv_head_node;
 };
 
+class LogicNode {
+	friend class LogicSystem;
+public:
+	LogicNode(shared_ptr<CSession>, shared_ptr<RecvNode>);
+private:
+	shared_ptr<CSession> _session;
+	shared_ptr<RecvNode> _recvnode;
+};
