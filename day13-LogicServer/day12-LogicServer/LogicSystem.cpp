@@ -3,6 +3,7 @@
 using namespace std;
 
 LogicSystem::LogicSystem():_b_stop(false){
+	RegisterCallBacks();
 	_worker_thread = std::thread (&LogicSystem::DealMsg, this);
 }
 
@@ -37,6 +38,13 @@ void LogicSystem::DealMsg() {
 		//否则说明队列中有数据
 		auto msg_node = _msg_que.front();
 		cout << "recv_msg id  is " << msg_node->_recvnode->_msg_id << endl;
+		auto call_back_iter = _fun_callbacks.find(msg_node->_recvnode->_msg_id);
+		if (call_back_iter == _fun_callbacks.end()) {
+			_msg_que.pop();
+			continue;
+		}
+		call_back_iter->second(msg_node->_session, msg_node->_recvnode->_msg_id, 
+			std::string(msg_node->_recvnode->_data, msg_node->_recvnode->_cur_len));
 		_msg_que.pop();
 	}
 }
@@ -46,6 +54,13 @@ void LogicSystem::RegisterCallBacks() {
 		placeholders::_1, placeholders::_2, placeholders::_3);
 }
 
-void LogicSystem::HelloWordCallBack(shared_ptr<CSession>, short msg_id, string msg_data) {
-
+void LogicSystem::HelloWordCallBack(shared_ptr<CSession> session, short msg_id, string msg_data) {
+	Json::Reader reader;
+	Json::Value root;
+	reader.parse(msg_data, root);
+	std::cout << "recevie msg id  is " << root["id"].asInt() << " msg data is "
+		<< root["data"].asString() << endl;
+	root["data"] = "server has received msg, msg data is " + root["data"].asString();
+	std::string return_str = root.toStyledString();
+	session->Send(return_str, root["id"].asInt());
 }

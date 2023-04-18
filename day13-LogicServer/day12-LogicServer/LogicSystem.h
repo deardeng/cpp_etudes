@@ -7,6 +7,10 @@
 #include <map>
 #include <functional>
 #include "const.h"
+#include <json/json.h>
+#include <json/value.h>
+#include <json/reader.h>
+
 typedef  function<void(shared_ptr<CSession>, short msg_id, string msg_data)> FunCallBack;
 class LogicSystem:public Singleton<LogicSystem>
 {
