@@ -8,9 +8,9 @@ LogicSystem::LogicSystem():_b_stop(false){
 }
 
 LogicSystem::~LogicSystem(){
-	_worker_thread.join();
 	_b_stop = true;
 	_consume.notify_one();
+	_worker_thread.join();
 }
 
 void LogicSystem::PostMsgToQue(shared_ptr < LogicNode> msg) {
@@ -30,12 +30,24 @@ void LogicSystem::DealMsg() {
 			_consume.wait(unique_lk);
 		}
 
-		//判断是否为关闭状态，是则退出循环
-		if (_b_stop) {
+		//判断是否为关闭状态，把所有逻辑执行完后则退出循环
+		if (_b_stop ) {
+			while (!_msg_que.empty()) {
+				auto msg_node = _msg_que.front();
+				cout << "recv_msg id  is " << msg_node->_recvnode->_msg_id << endl;
+				auto call_back_iter = _fun_callbacks.find(msg_node->_recvnode->_msg_id);
+				if (call_back_iter == _fun_callbacks.end()) {
+					_msg_que.pop();
+					continue;
+				}
+				call_back_iter->second(msg_node->_session, msg_node->_recvnode->_msg_id,
+					std::string(msg_node->_recvnode->_data, msg_node->_recvnode->_cur_len));
+				_msg_que.pop();
+			}
 			break;
 		}
 
-		//否则说明队列中有数据
+		//如果没有停服，且说明队列中有数据
 		auto msg_node = _msg_que.front();
 		cout << "recv_msg id  is " << msg_node->_recvnode->_msg_id << endl;
 		auto call_back_iter = _fun_callbacks.find(msg_node->_recvnode->_msg_id);
