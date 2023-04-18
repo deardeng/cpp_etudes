@@ -26,7 +26,7 @@ void LogicSystem::DealMsg() {
 	for (;;) {
 		std::unique_lock<std::mutex> unique_lk(_mutex);
 		//判断队列为空则用条件变量阻塞等待，并释放锁
-		while (_msg_que.empty()) {
+		while (_msg_que.empty() && !_b_stop) {
 			_consume.wait(unique_lk);
 		}
 
