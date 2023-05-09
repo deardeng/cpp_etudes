@@ -11,7 +11,7 @@ std::condition_variable cond_quit;
 std::mutex mutex_quit;
 void sig_handler(int sig)
 {
-	if (sig == SIGINT)
+	if (sig == SIGINT||sig == SIGTERM)
 	{
 		bstop = true;
 		cond_quit.notify_one();
