@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.32602.291
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "day11-JsonClient", "day11-JsonClient\day11-JsonClient.vcxproj", "{F61A4A3D-15DF-462F-A260-20CD35C09268}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsioThreadPool", "ThreadPoolServer\day13-LogicServer.vcxproj", "{1329B5AF-7D3F-4FBB-8817-7364404A58ED}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsioThreadPool", "ThreadPoolServer\ThreadPoolServer.vcxproj", "{1329B5AF-7D3F-4FBB-8817-7364404A58ED}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StrandThreadPool", "StrandPoolServer\StrandPoolServer.vcxproj", "{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{1329B5AF-7D3F-4FBB-8817-7364404A58ED}.Release|x64.Build.0 = Release|x64
 		{1329B5AF-7D3F-4FBB-8817-7364404A58ED}.Release|x86.ActiveCfg = Release|Win32
 		{1329B5AF-7D3F-4FBB-8817-7364404A58ED}.Release|x86.Build.0 = Release|Win32
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Debug|x64.ActiveCfg = Debug|x64
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Debug|x64.Build.0 = Debug|x64
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Debug|x86.ActiveCfg = Debug|Win32
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Debug|x86.Build.0 = Debug|Win32
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Release|x64.ActiveCfg = Release|x64
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Release|x64.Build.0 = Release|x64
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Release|x86.ActiveCfg = Release|Win32
+		{6EAEEEF3-C1C8-48C1-BE71-36BED7A05B8D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
