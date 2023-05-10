@@ -13,6 +13,7 @@ void sig_handler(int sig)
 {
 	if (sig == SIGINT||sig == SIGTERM)
 	{
+		std::unique_lock<std::mutex>  lock_quit(mutex_quit);
 		bstop = true;
 		cond_quit.notify_one();
 	}
