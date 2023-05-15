@@ -29,10 +29,10 @@ int main()
 		msgdata.set_data("hello world");
 		std::string request;
 		msgdata.SerializeToString(&request);
-		size_t request_length = request.length();
+		short request_length = request.length();
 		char send_data[MAX_LENGTH] = { 0 };
 		//转为网络字节序
-		int request_host_length = boost::asio::detail::socket_ops::host_to_network_short(request_length);
+		short request_host_length = boost::asio::detail::socket_ops::host_to_network_short(request_length);
 		memcpy(send_data, &request_host_length, 2);
 		memcpy(send_data + 2, request.c_str(), request_length);
 		boost::asio::write(sock, boost::asio::buffer(send_data, request_length + 2));

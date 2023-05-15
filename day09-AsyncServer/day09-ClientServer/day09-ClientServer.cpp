@@ -27,10 +27,10 @@ int main()
 			for (;;) {
 				this_thread::sleep_for(std::chrono::milliseconds(2));
 				const char* request = "hello world!";
-				size_t request_length = strlen(request);
+				short request_length = strlen(request);
 				char send_data[MAX_LENGTH] = { 0 };
 				//转为网络字节序
-				int request_host_length = boost::asio::detail::socket_ops::host_to_network_short(request_length);
+				short request_host_length = boost::asio::detail::socket_ops::host_to_network_short(request_length);
 				memcpy(send_data, &request_host_length, 2);
 				memcpy(send_data + 2, request, request_length);
 				boost::asio::write(sock, boost::asio::buffer(send_data, request_length + 2));
