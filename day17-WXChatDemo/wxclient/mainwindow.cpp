@@ -8,9 +8,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     // 创建一个 CentralWidget，并将其设置为 MainWindow 的中心部件
-    QWidget *centralWidget = new LoginDialog();
-    setCentralWidget(centralWidget);
-    centralWidget->show();
+    _login_dlg = new LoginDialog();
+    setCentralWidget(_login_dlg);
+    _login_dlg->show();
 }
 
 MainWindow::~MainWindow()

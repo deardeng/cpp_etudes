@@ -10,6 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = wxclient
 TEMPLATE = app
+RC_ICONS = icon.ico
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -27,15 +28,20 @@ CONFIG += c++11
 SOURCES += \
         logindialog.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        presslabel.cpp \
+        registerdialog.cpp
 
 HEADERS += \
         logindialog.h \
-        mainwindow.h
+        mainwindow.h \
+        presslabel.h \
+        registerdialog.h
 
 FORMS += \
         logindialog.ui \
-        mainwindow.ui
+        mainwindow.ui \
+        registerdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
