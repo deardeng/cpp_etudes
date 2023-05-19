@@ -363,7 +363,7 @@ cursor: pointer;
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="reg_btn">
          <property name="minimumSize">
           <size>
            <width>100</width>

@@ -9,7 +9,8 @@ LoginDialog::LoginDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->forget_label->setCursor(QCursor(Qt::PointingHandCursor));
-    connect(ui->forget_label, &PressLabel::clicked, this, &LoginDialog::switchRegister);
+    connect(ui->forget_label, &PressLabel::clicked, this, &LoginDialog::forgetPwd);
+    connect(ui->reg_btn, &QPushButton::clicked, this, &LoginDialog::switchRegister);
 }
 
 LoginDialog::~LoginDialog()

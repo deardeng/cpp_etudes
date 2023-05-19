@@ -19,6 +19,7 @@ private:
     Ui::LoginDialog *ui;
 signals:
     void switchRegister();
+    void forgetPwd();
 };
 
 #endif // LOGINDIALOG_H

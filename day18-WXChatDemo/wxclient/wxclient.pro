@@ -30,13 +30,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         presslabel.cpp \
-        registerdialog.cpp
+        registerdialog.cpp \
+        timerbtn.cpp
 
 HEADERS += \
         logindialog.h \
         mainwindow.h \
         presslabel.h \
-        registerdialog.h
+        registerdialog.h \
+        timerbtn.h
 
 FORMS += \
         logindialog.ui \
