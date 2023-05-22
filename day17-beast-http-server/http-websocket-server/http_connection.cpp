@@ -13,8 +13,8 @@ namespace my_program_state {
 	}
 }
 
-http_connection::http_connection(tcp::socket socket)
-	: socket_(std::move(socket)), ws_ptr_(nullptr)
+http_connection::http_connection(tcp::socket socket, boost::asio::io_context& ioc)
+	: socket_(std::move(socket)), ws_ptr_(nullptr), _ioc(ioc),_strand(ioc.get_executor())
 {
 }
 
@@ -209,7 +209,7 @@ void http_connection::async_send_message(const std::string &message)
 
 void http_connection::async_write(const std::string &message) {
 	auto self = shared_from_this();
-	self->ws_ptr_->async_write(boost::asio::buffer(message.c_str(), message.length()), 
+	self->ws_ptr_->async_write(boost::asio::buffer(message.c_str(), message.length()), boost::asio::bind_executor(_strand,
 		[self](boost::system::error_code ec, std::size_t bytes_transferred)
 		{
 			try {
@@ -237,17 +237,15 @@ void http_connection::async_write(const std::string &message) {
 			}
 			catch (std::exception const& e) {
 				std::cerr << "Error: " << e.what() << std::endl;
-				return ;
+				return;
 			}
-		});
+		}));
 }
 
 void http_connection::websocket_async_read() {
-
 	auto self = shared_from_this();
 	// Read a complete message into the buffer's input area asynchronously
-	self->ws_ptr_->async_read(self->_read_buffer,
-		[self](boost::system::error_code ec, std::size_t bytes_transferred)
+	self->ws_ptr_->async_read(self->_read_buffer, boost::asio::bind_executor(_strand, [self](boost::system::error_code ec, std::size_t bytes_transferred)
 		{
 			try {
 				if (!ec)
@@ -259,7 +257,7 @@ void http_connection::websocket_async_read() {
 					// Echo the received message back to the peer. If the received
 					// message was in text mode, the echoed message will also be
 					// in text mode, otherwise it will be in binary mode.
-					const auto &recv_data = boost::beast::buffers_to_string(self->_read_buffer.data());
+					const auto& recv_data = boost::beast::buffers_to_string(self->_read_buffer.data());
 					std::cout << "websocket receive data is " << recv_data << std::endl;
 					self->async_send_message(recv_data);
 
@@ -278,7 +276,8 @@ void http_connection::websocket_async_read() {
 			catch (std::exception const& e)
 			{
 				std::cerr << "Error: " << e.what() << std::endl;
-				return ;
+				return;
 			}
-		});
+		})
+		);
 }

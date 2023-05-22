@@ -31,7 +31,7 @@ namespace my_program_state
 class http_connection : public std::enable_shared_from_this<http_connection>
 {
 public:
-	http_connection(tcp::socket socket);
+	http_connection(tcp::socket socket, boost::asio::io_context& ioc);
 
 	// Handle WebSocket error
 	void handle_error(boost::system::error_code ec);
@@ -82,5 +82,7 @@ private:
 	flat_buffer _read_buffer;
 	std::queue<std::string> _send_que;
 	std::mutex  _mutex;
+	boost::asio::strand<boost::asio::io_context::executor_type> _strand;
+	boost::asio::io_context& _ioc;
 };
 

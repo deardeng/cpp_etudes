@@ -2,14 +2,14 @@
 
 // "Loop" forever accepting new connections.
 void
-http_server(tcp::acceptor& acceptor, tcp::socket& socket)
+http_server(tcp::acceptor& acceptor, tcp::socket& socket, boost::asio::io_context& ioc)
 {
 	acceptor.async_accept(socket,
 		[&](beast::error_code ec)
 		{
 			if (!ec)
-				std::make_shared<http_connection>(std::move(socket))->start();
-			http_server(acceptor, socket);
+				std::make_shared<http_connection>(std::move(socket), ioc)->start();
+			http_server(acceptor, socket, ioc);
 		});
 }
 
@@ -24,7 +24,7 @@ main(int argc, char* argv[])
 		net::io_context ioc{ 1 };
 		tcp::acceptor acceptor{ ioc, {address, port} };
 		tcp::socket socket{ ioc };
-		http_server(acceptor, socket);
+		http_server(acceptor, socket, ioc);
 		ioc.run();
 	}
 	catch (std::exception const& e)
