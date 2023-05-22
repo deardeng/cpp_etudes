@@ -26,6 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        forgetdialog.cpp \
         logindialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -34,6 +35,7 @@ SOURCES += \
         timerbtn.cpp
 
 HEADERS += \
+        forgetdialog.h \
         logindialog.h \
         mainwindow.h \
         presslabel.h \
@@ -41,6 +43,7 @@ HEADERS += \
         timerbtn.h
 
 FORMS += \
+        forgetdialog.ui \
         logindialog.ui \
         mainwindow.ui \
         registerdialog.ui
