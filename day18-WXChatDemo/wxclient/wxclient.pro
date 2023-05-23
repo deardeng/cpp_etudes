@@ -27,6 +27,7 @@ CONFIG += c++11
 
 SOURCES += \
         forgetdialog.cpp \
+        httpmgr.cpp \
         logindialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -36,10 +37,12 @@ SOURCES += \
 
 HEADERS += \
         forgetdialog.h \
+        httpmgr.h \
         logindialog.h \
         mainwindow.h \
         presslabel.h \
         registerdialog.h \
+        singleton.h \
         timerbtn.h
 
 FORMS += \

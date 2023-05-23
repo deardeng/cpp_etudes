@@ -10,12 +10,13 @@ public:
     TimerBtn(QWidget *parent = nullptr);
     QTimer* _timer;
 protected:
-    void keyPressEvent(QKeyEvent *) override;
+
 private:
     unsigned int _seconds;
     QString _text;
 public slots:
     void SlotTimeOut();
+    void SlotWait();
 };
 
 #endif // TIMERBTN_H

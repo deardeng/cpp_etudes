@@ -1,0 +1,17 @@
+1 先创建一个wxsql容器基于mysql:8.0
+
+docker run -d -p 3316:3306 --name wxsql -e MYSQL_ROOT_PASSWORD=123456  mysql:8.0
+
+2 然后将要使用的配置copy出来（/home/zack/wxchat/mysqlconf为本机路径）
+
+docker cp wxsql:/etc/mysql /home/zack/wxchat/mysqlconf
+
+3 删除旧容器
+
+docker rm -f wxsql
+
+4 重新启动容器挂载目录
+
+docker run -d -p 3316:3306 --name wxsql -v /home/zack/wxchat/mysqlconf:/etc/mysql \
+-v /home/zack/wxchat/mysqldata:/var/lib/mysql \
+-e MYSQL_ROOT_PASSWORD=123456 --restart always mysql:8.0

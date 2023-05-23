@@ -257,7 +257,6 @@ color:black;
 
 #forget_label:hover{
 color: rgb(9,130,217);
-cursor: pointer;
 }</string>
          </property>
          <property name="text">

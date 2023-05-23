@@ -17,6 +17,16 @@ public:
 
 private:
     Ui::RegisterDialog *ui;
+
+private slots:
+
+    void on_get_code_clicked();
+
+    void on_email_editingFinished();
+
+signals:
+    void SigWait();
+
 };
 
 #endif // REGISTERDIALOG_H

@@ -1,6 +1,7 @@
 #include "timerbtn.h"
+#include <QDebug>
 
-TimerBtn::TimerBtn(QWidget *parent):QPushButton(parent),_seconds(60)
+TimerBtn::TimerBtn(QWidget *parent):QPushButton(parent),_seconds(20)
 {
     _timer = new QTimer(parent);
 
@@ -10,15 +11,9 @@ TimerBtn::TimerBtn(QWidget *parent):QPushButton(parent),_seconds(60)
 
     // 连接定时器的 timeout 信号和槽函数
     connect(_timer, &QTimer::timeout, this, &TimerBtn::SlotTimeOut);
-    _text = this->text();
 }
 
-void TimerBtn::keyPressEvent(QKeyEvent *event)
-{
-    this->setEnabled(false);
-    _timer->start();
-    QPushButton::keyPressEvent(event);
-}
+
 
 void TimerBtn::SlotTimeOut()
 {
@@ -28,8 +23,16 @@ void TimerBtn::SlotTimeOut()
     }else{
         _timer->stop();
         this->setText(_text);
-        _seconds = 60;
+        _seconds = 20;
         this->setEnabled(true);
     }
 
+}
+
+void TimerBtn::SlotWait(){
+    _text = this->text();
+    qDebug() << "_text is " << _text ;
+    this->setEnabled(false);
+    _timer->stop();
+    _timer->start();
 }
