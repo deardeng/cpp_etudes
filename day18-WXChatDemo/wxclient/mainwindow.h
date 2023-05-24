@@ -1,5 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+/******************************************************************************
+ *
+ * @file       mainwindow.h
+ * @brief      登录界面管理类
+ *
+ * @author     恋恋风辰
+ * @date       2023/05/24
+ * @history
+ *****************************************************************************/
 #include "logindialog.h"
 #include "registerdialog.h"
 #include <QMainWindow>

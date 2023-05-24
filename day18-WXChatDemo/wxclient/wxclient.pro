@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,6 +27,7 @@ CONFIG += c++11
 
 SOURCES += \
         forgetdialog.cpp \
+        global.cpp \
         httpmgr.cpp \
         logindialog.cpp \
         main.cpp \
@@ -37,6 +38,7 @@ SOURCES += \
 
 HEADERS += \
         forgetdialog.h \
+        global.h \
         httpmgr.h \
         logindialog.h \
         mainwindow.h \

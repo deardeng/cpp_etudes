@@ -25,7 +25,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
+/**
+ * @brief 点击注册后切换到注册界面
+ */
 void MainWindow::SlotSwitchReg(){
     setCentralWidget(_reg_dlg);
     _login_dlg->hide();

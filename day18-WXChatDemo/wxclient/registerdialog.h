@@ -1,6 +1,14 @@
 #ifndef REGISTERDIALOG_H
 #define REGISTERDIALOG_H
-
+/******************************************************************************
+ *
+ * @file       registerdialog.h
+ * @brief      注册界面管理类
+ *
+ * @author     恋恋风辰
+ * @date       2023/05/24
+ * @history
+ *****************************************************************************/
 #include <QDialog>
 
 namespace Ui {

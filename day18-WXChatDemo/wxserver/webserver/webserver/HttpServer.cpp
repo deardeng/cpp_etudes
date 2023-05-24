@@ -7,6 +7,12 @@ HttpServer::HttpServer(boost::asio::io_context& ioc, int port):
 }
 
 
+//************************************
+// 函数名:    Start
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:		  HttpServer接收连接并且将socket的管理权交给 HttpConnection处理			 
+//************************************
 void HttpServer::Start(){
 	auto self = shared_from_this();
 	_acceptor.async_accept(_socket,

@@ -7,6 +7,12 @@ HttpConnection::HttpConnection(tcp::socket socket)
 
 }
 
+//************************************
+// 函数名:    ReadRequest
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:       监听读事件并处理客户端的请求
+//************************************
 void HttpConnection::ReadRequest() {
 	auto self = shared_from_this();
 
@@ -23,7 +29,13 @@ void HttpConnection::ReadRequest() {
 		});
 }
 
-//处理get请求
+
+//************************************
+// 函数名:    HandleGet
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:		  处理get请求
+//************************************
 void HttpConnection::HandleGet() {
 	auto self = shared_from_this();
 	bool success = LogicSystem::GetInstance()->HandleGet(request_.target(), self);
@@ -33,7 +45,13 @@ void HttpConnection::HandleGet() {
 		beast::ostream(response_.body()) << "url not found\r\n";
 	}
 }
-//处理post请求
+
+//************************************
+// 函数名:    HandlePost
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:       处理post请求
+//************************************
 void HttpConnection::HandlePost() {
 	auto self = shared_from_this();
 	bool success = LogicSystem::GetInstance()->HandlePost(request_.target(), self);
@@ -44,6 +62,12 @@ void HttpConnection::HandlePost() {
 	}
 }
 
+//************************************
+// 函数名:    WriteResponse
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:       发送回包给客户端
+//************************************
 void HttpConnection::WriteResponse() {
 	auto self = shared_from_this();
 
@@ -60,6 +84,12 @@ void HttpConnection::WriteResponse() {
 }
 
 
+//************************************
+// 函数名:    ProcessRequest
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:       分别处理对端的get和post请求
+//************************************
 void HttpConnection::ProcessRequest() {
 	response_.version(request_.version());
 	response_.keep_alive(false);
@@ -79,8 +109,6 @@ void HttpConnection::ProcessRequest() {
 		break;
 
 	default:
-		// We return responses indicating an error if
-		// we do not recognize the request method.
 		response_.result(http::status::bad_request);
 		response_.set(http::field::content_type, "text/plain");
 		beast::ostream(response_.body())
@@ -93,11 +121,23 @@ void HttpConnection::ProcessRequest() {
 	WriteResponse();
 }
 
+//************************************
+// 函数名:    Start
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:       http连接启动后监听读事件并且开启超时检测
+//************************************
 void HttpConnection::Start(){
 	ReadRequest();
 	CheckDeadline();
 }
 
+//************************************
+// 函数名:    CheckDeadline
+// 返回值:    void
+// 作者:       恋恋风辰
+// 功能:       检测超时
+//************************************
 void HttpConnection::CheckDeadline(){
 	auto self = shared_from_this();
 

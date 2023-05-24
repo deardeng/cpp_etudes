@@ -14,7 +14,10 @@ TimerBtn::TimerBtn(QWidget *parent):QPushButton(parent),_seconds(20)
 }
 
 
-
+/**
+ * @brief 定时器回调函数
+ * 实现倒计时效果，时间为0恢复原文字
+ */
 void TimerBtn::SlotTimeOut()
 {
     _seconds--;
@@ -29,6 +32,9 @@ void TimerBtn::SlotTimeOut()
 
 }
 
+/**
+ * @brief 点击该按钮后文本变为时间倒计时
+ */
 void TimerBtn::SlotWait(){
     _text = this->text();
     qDebug() << "_text is " << _text ;

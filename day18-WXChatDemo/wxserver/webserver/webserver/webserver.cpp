@@ -4,6 +4,15 @@
 #include <iostream>
 #include "HttpConnection.h"
 #include "HttpServer.h"
+
+//************************************
+// 函数名:    http_server
+// 返回值:    void
+// 参数:       tcp::acceptor & acceptor
+// 参数:       tcp::socket & socket
+// 作者:       恋恋风辰
+// 功能:       监听对端连接请求，socket交给新的连接处理
+//************************************
 void
 http_server(tcp::acceptor& acceptor, tcp::socket& socket)
 {
@@ -16,6 +25,14 @@ http_server(tcp::acceptor& acceptor, tcp::socket& socket)
 		});
 }
 
+//************************************
+// 函数名:    main
+// 返回值:    int
+// 参数:       int argc
+// 参数:       char * argv[]
+// 作者:       恋恋风辰
+// 功能:       主程序启动入口，监听SIGINT信号等待退出。
+//************************************
 int
 main(int argc, char* argv[])
 {

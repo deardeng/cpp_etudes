@@ -14,6 +14,7 @@ class LogicSystem:public Singleton<LogicSystem>
 	friend class Singleton<LogicSystem>;
 public:
 	~LogicSystem();
+	
 	bool HandlePost(std::string, std::shared_ptr<HttpConnection>);
 	bool HandleGet(std::string, std::shared_ptr<HttpConnection>);
 private:

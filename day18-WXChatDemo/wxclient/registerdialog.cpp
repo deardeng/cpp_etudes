@@ -6,6 +6,7 @@
 #include "httpmgr.h"
 #include <QUrl>
 #include <QJsonObject>
+#include "global.h"
 
 RegisterDialog::RegisterDialog(QWidget *parent) :
     QDialog(parent),
@@ -20,8 +21,9 @@ RegisterDialog::~RegisterDialog()
     delete ui;
 }
 
-
-//获取验证码
+/**
+ * @brief 获取验证码
+ */
 void RegisterDialog::on_get_code_clicked()
 {
     // 待验证的邮箱地址
@@ -37,7 +39,8 @@ void RegisterDialog::on_get_code_clicked()
         QUrl url("/getvarifycode");
         QJsonObject json_obj;
         json_obj["email"]=email;
-        HttpMgr::GetInstance()->PostHttpReq(std::move(url), )
+        qDebug()<<"config path is " << g_config_path << endl;
+        //HttpMgr::GetInstance()->PostHttpReq(std::move(url), )
         return;
     } else {
         qDebug() << "不是一个合法的邮箱地址";
@@ -48,7 +51,10 @@ void RegisterDialog::on_get_code_clicked()
 
 }
 
-//捕获email输入框输入完成事件
+
+/**
+ * @brief 捕获email输入框输入完成事件
+ */
 void RegisterDialog::on_email_editingFinished()
 {
     // 待验证的邮箱地址

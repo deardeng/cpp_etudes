@@ -12,7 +12,12 @@ HttpMgr::HttpMgr()
 HttpMgr::~HttpMgr(){
 
 }
-
+/**
+ * @brief 发送post请求
+ * @param 服务器端url如localhost:8080/varifycode
+ * @param json数据
+ * @return 成功或失败
+ */
 bool HttpMgr::PostHttpReq(QUrl url, QJsonObject json)
 {
         bool res=true;
