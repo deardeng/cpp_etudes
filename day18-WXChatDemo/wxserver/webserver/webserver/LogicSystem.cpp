@@ -19,8 +19,19 @@ LogicSystem::LogicSystem(){
 		cout << "receive body is " << body_str << endl;
 		connection->response_.set(http::field::content_type, "text/json");
 		Json::Value root;
+		Json::Reader reader;
+		Json::Value src_root;
+		bool parse_success = reader.parse(body_str, src_root);
+		if (!parse_success) {
+			cout << "Failed to parse JSON data!" << endl;
+			root["error"] = ErrorCodes::Error_Json;
+			std::string jsonstr = root.toStyledString();
+			beast::ostream(connection->response_.body()) << jsonstr;
+			return true;
+		}
+
 		root["error"] = 0;
-		root["varifycode"] = "helloworld";
+		root["email"] = src_root["email"];
 		std::string jsonstr = root.toStyledString();
 		beast::ostream(connection->response_.body()) << jsonstr;
 

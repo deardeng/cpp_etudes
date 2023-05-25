@@ -1,8 +1,8 @@
 #include "httpmgr.h"
-#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork>
 #include <QUrl>
 #include <QJsonDocument>
-#include <QtNetwork/QNetworkReply>
+
 
 HttpMgr::HttpMgr()
 {
@@ -16,33 +16,54 @@ HttpMgr::~HttpMgr(){
  * @brief 发送post请求
  * @param 服务器端url如localhost:8080/varifycode
  * @param json数据
- * @return 成功或失败
  */
-bool HttpMgr::PostHttpReq(QUrl url, QJsonObject json)
+void HttpMgr::PostHttpReq(QUrl url, QJsonObject json)
 {
-        bool res=true;
         // 创建一个 QNetworkAccessManager 对象，用于发送 HTTP 请求
-        QNetworkAccessManager manager;
+
 
         // 创建一个 HTTP POST 请求，并设置请求头和请求体
         QByteArray data = QJsonDocument(json).toJson();
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         request.setHeader(QNetworkRequest::ContentLengthHeader, QByteArray::number(data.length()));
-
+        qDebug() << "req url is "<<url.url();
         // 发送请求，并处理响应
-        QNetworkReply *reply = manager.post(request, data);
-        QObject::connect(reply, &QNetworkReply::finished, [&](){
+        QNetworkReply *reply = _manager.post(request, data);
+        QObject::connect(reply, &QNetworkReply::finished, [reply](){
             if (reply->error() == QNetworkReply::NoError) {
                 QString res = reply->readAll();
                 qDebug() << res;
-                res =true;
             } else {
                 qDebug() << reply->errorString();
-                res = false;
             }
             reply->deleteLater();
         });
 
-        return res;
+//    qDebug() << "begin post req ";
+//   auto manager =  new QNetworkAccessManager() ;
+
+    // 创建请求对象
+//    QUrl url("http://localhost:8080/getvarifycode");
+//    QNetworkRequest request(url);
+//    QJsonObject json_obj;
+//    json_obj["email"]="sdfa.com";
+//    QByteArray data = QJsonDocument(json_obj).toJson();
+//    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+//    request.setHeader(QNetworkRequest::ContentLengthHeader, QByteArray::number(data.length()));
+//    qDebug() << "req url is "<<url.url();
+//    // 发送请求，并处理响应
+//    QNetworkReply *reply = manager->post(request, data);
+//    QObject::connect(reply, &QNetworkReply::finished, [reply](){
+//        qDebug() << "receive resp from server";
+//        if (reply->error() == QNetworkReply::NoError) {
+//            QString res = reply->readAll();
+//            qDebug() << "req success data is " << res << endl;
+//        } else {
+//            qDebug() << "req error is " << reply->errorString()<< endl;
+//        }
+//        reply->deleteLater();
+//    });
+
+
 }

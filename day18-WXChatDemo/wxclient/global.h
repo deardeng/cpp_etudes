@@ -12,4 +12,14 @@
 #include <QString>
 extern QString g_app_path;
 extern QString g_config_path;
+extern QString g_webhost;
+extern QString g_webport;
+extern QString g_weburl_prefix;
+
+
+
+enum ErrorCodes{
+    Error_Json = 1001,  //Json解析错误
+};
+
 #endif // GLOBAL_H

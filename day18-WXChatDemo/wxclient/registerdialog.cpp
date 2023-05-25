@@ -36,11 +36,10 @@ void RegisterDialog::on_get_code_clicked()
         ui->err_tip->hide();
         emit SigWait();
         //发送获取验证码请求
-        QUrl url("/getvarifycode");
+        QUrl url(g_weburl_prefix+"/getvarifycode");
         QJsonObject json_obj;
         json_obj["email"]=email;
-        qDebug()<<"config path is " << g_config_path << endl;
-        //HttpMgr::GetInstance()->PostHttpReq(std::move(url), )
+        HttpMgr::GetInstance()->PostHttpReq(std::move(url), json_obj);
         return;
     } else {
         qDebug() << "不是一个合法的邮箱地址";

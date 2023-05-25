@@ -14,15 +14,17 @@
 #include <QString>
 #include <QJsonObject>
 #include <QUrl>
-
+#include <QObject>
+#include <QNetworkAccessManager>
 class HttpMgr:public Singleton<HttpMgr>
 {
 public:
     ~HttpMgr();
-    bool PostHttpReq(QUrl url, QJsonObject data);
+    void PostHttpReq(QUrl url, QJsonObject data);
 private:
     friend class Singleton<HttpMgr>;
     HttpMgr();
+    QNetworkAccessManager _manager;
 };
 
 #endif // HTTPMGR_H
