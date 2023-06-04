@@ -66,7 +66,7 @@ void LogicSystem::RegisterCallBacks() {
 		placeholders::_1, placeholders::_2, placeholders::_3);
 }
 
-void LogicSystem::HelloWordCallBack(shared_ptr<CSession> session, short msg_id, string msg_data) {
+void LogicSystem::HelloWordCallBack(shared_ptr<CSession> session, const short &msg_id, const string &msg_data) {
 	Json::Reader reader;
 	Json::Value root;
 	reader.parse(msg_data, root);
