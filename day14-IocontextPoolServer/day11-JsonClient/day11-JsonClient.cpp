@@ -73,7 +73,7 @@ int main()
 				std::cerr << "Exception: " << e.what() << endl;
 			}
 			});
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
 	for (auto& t : vec_threads) {
@@ -82,8 +82,8 @@ int main()
 	// 执行一些需要计时的操作
 	auto end = std::chrono::high_resolution_clock::now(); // 获取结束时间
 
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start); // 计算时间差，单位为微秒
-	std::cout << "Time spent: " << duration.count() << " microseconds." << std::endl; // 输
+	auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start); // 计算时间差，单位为微秒
+	std::cout << "Time spent: " << duration.count() << " seconds." << std::endl; // 输
 	getchar();
 	return 0;
 }
