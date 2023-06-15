@@ -38,6 +38,6 @@ void AsioIOServicePool::Stop(){
 }
 
 AsioIOServicePool& AsioIOServicePool::GetInstance() {
-	static AsioIOServicePool instance;
+	static AsioIOServicePool instance(1);
 	return instance;
 }

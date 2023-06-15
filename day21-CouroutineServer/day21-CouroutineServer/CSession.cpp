@@ -96,7 +96,7 @@ void CSession::Start() {
 				_recv_msg_node->_data[_recv_msg_node->_total_len] = '\0';
 				cout << "receive data is " << _recv_msg_node->_data << endl;
 				//投递给逻辑线程
-				LogicSystem::GetInstance()->PostMsgToQue(make_shared<LogicNode>(shared_from_this(), _recv_msg_node));
+				LogicSystem::GetInstance().PostMsgToQue(make_shared<LogicNode>(shared_from_this(), _recv_msg_node));
 			}
 
 		}

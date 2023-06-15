@@ -76,3 +76,8 @@ void LogicSystem::HelloWordCallBack(shared_ptr<CSession> session, const short &m
 	std::string return_str = root.toStyledString();
 	session->Send(return_str, root["id"].asInt());
 }
+
+LogicSystem& LogicSystem::GetInstance(){
+	static LogicSystem instance;
+	return instance;
+}

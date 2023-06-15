@@ -1,5 +1,5 @@
 #pragma once
-#include "Singleton.h"
+
 #include <queue>
 #include <thread>
 #include "CSession.h"
@@ -12,12 +12,12 @@
 #include <json/reader.h>
 
 typedef  function<void(shared_ptr<CSession>, const short &msg_id, const string &msg_data)> FunCallBack;
-class LogicSystem:public Singleton<LogicSystem>
+class LogicSystem
 {
-	friend class Singleton<LogicSystem>;
 public:
 	~LogicSystem();
 	void PostMsgToQue(shared_ptr < LogicNode> msg);
+	static LogicSystem& GetInstance();
 private:
 	LogicSystem();
 	void DealMsg();

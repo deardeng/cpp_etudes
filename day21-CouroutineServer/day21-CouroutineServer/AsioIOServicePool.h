@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <boost/asio.hpp>
-#include "Singleton.h"
 class AsioIOServicePool 
 {
 public:
