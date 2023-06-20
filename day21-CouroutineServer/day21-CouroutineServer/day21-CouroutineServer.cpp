@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include "CServer.h"
-#include "Singleton.h"
 #include "LogicSystem.h"
 #include <csignal>
 #include <thread>
