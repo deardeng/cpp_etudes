@@ -3,6 +3,7 @@
 #include <json/json.h>
 #include <json/value.h>
 #include <json/reader.h>
+#include "VarifyClient.h"
 using namespace std;
 
 //************************************
@@ -29,9 +30,21 @@ LogicSystem::LogicSystem(){
 			beast::ostream(connection->response_.body()) << jsonstr;
 			return true;
 		}
+		auto email = src_root["email"].asString();
+		cout << "email is " << email << endl;
+		std::string codestr = "";
+		int n_res = VarifyClient::GetInstance().GetVarifyCode(email, codestr);
+
+		if (n_res != ErrorCodes::Success) {
+			root["error"] = n_res;
+			std::string jsonstr = root.toStyledString();
+			beast::ostream(connection->response_.body()) << jsonstr;
+			return true;
+		}
 
 		root["error"] = 0;
 		root["email"] = src_root["email"];
+		root["code"] = codestr;
 		std::string jsonstr = root.toStyledString();
 		beast::ostream(connection->response_.body()) << jsonstr;
 
