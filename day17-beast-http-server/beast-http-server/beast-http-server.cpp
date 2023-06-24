@@ -8,6 +8,9 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <json/json.h>
+#include <json/value.h>
+#include <json/reader.h>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
@@ -96,7 +99,11 @@ private:
 			response_.set(http::field::server, "Beast");
 			create_response();
 			break;
-
+		case http::verb::post:
+			response_.result(http::status::ok);
+			response_.set(http::field::server, "Beast");
+			create_post_response();
+			break;
 		default:
 			// We return responses indicating an error if
 			// we do not recognize the request method.
@@ -143,6 +150,42 @@ private:
 				<< " seconds since the epoch.</p>\n"
 				<< "</body>\n"
 				<< "</html>\n";
+		}
+		else
+		{
+			response_.result(http::status::not_found);
+			response_.set(http::field::content_type, "text/plain");
+			beast::ostream(response_.body()) << "File not found\r\n";
+		}
+	}
+
+	void create_post_response() {
+		if (request_.target() == "/email")
+		{
+			auto& body = this->request_.body();
+			auto body_str = boost::beast::buffers_to_string(body.data());
+			std::cout << "receive body is " << body_str << std::endl;
+			this->response_.set(http::field::content_type, "text/json");
+			Json::Value root;
+			Json::Reader reader;
+			Json::Value src_root;
+			bool parse_success = reader.parse(body_str, src_root);
+			if (!parse_success) {
+				std::cout << "Failed to parse JSON data!" << std::endl;
+				root["error"] = 1001;
+				std::string jsonstr = root.toStyledString();
+				beast::ostream(this->response_.body()) << jsonstr;
+				return ;
+			}
+
+			auto email = src_root["email"].asString();
+			std::cout << "email is " << email << std::endl;
+
+			root["error"] = 0;
+			root["email"] = src_root["email"];
+			root["msg"] = "recevie email post success";
+			std::string jsonstr = root.toStyledString();
+			beast::ostream(this->response_.body()) << jsonstr;
 		}
 		else
 		{

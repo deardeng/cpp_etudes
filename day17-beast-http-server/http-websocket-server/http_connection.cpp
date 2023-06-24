@@ -1,5 +1,4 @@
 #include "http_connection.h"
-
 namespace my_program_state {
 	std::size_t request_count()
 	{
@@ -72,7 +71,7 @@ void http_connection::process_request()
 		response_.set(http::field::server, "Beast");
 		create_response();
 		break;
-
+..
 	default:
 		// We return responses indicating an error if
 		// we do not recognize the request method.
@@ -87,6 +86,7 @@ void http_connection::process_request()
 
 	write_response();
 }
+
 
 // Construct a response message based on the program state.
 void http_connection::create_response()
