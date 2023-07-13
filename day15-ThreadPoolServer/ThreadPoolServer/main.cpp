@@ -22,6 +22,7 @@ int main()
 			pool->Stop();
 			std::unique_lock<std::mutex> lock(mutex_quit);
 			bstop = true;
+			lock.unlock();
 			cond_quit.notify_one();
 			});
 		CServer s(pool->GetIOService(), 10086);

@@ -15,6 +15,7 @@ void sig_handler(int sig)
 	{
 		std::unique_lock<std::mutex>  lock_quit(mutex_quit);
 		bstop = true;
+		lock_quit.unlock();
 		cond_quit.notify_one();
 	}
 }
