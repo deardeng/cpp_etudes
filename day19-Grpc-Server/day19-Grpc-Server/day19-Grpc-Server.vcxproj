@@ -119,7 +119,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>D:\workspace\github\grpc\third_party\re2;D:\workspace\github\grpc\third_party\address_sorting\include;D:\workspace\github\grpc\third_party\abseil-cpp;D:\workspace\github\grpc\third_party\protobuf\src;D:\workspace\github\grpc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\cppsoft\grpc\third_party\re2;D:\cppsoft\grpc\third_party\address_sorting\include;D:\cppsoft\grpc\third_party\abseil-cpp;D:\cppsoft\grpc\third_party\protobuf\src;D:\cppsoft\grpc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
