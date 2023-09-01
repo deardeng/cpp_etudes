@@ -383,7 +383,7 @@ public:
 
 	bool try_lock() {
 		check_for_hierarchy_violation();
-		if (_internal_mutex.try_lock()) {
+		if (!_internal_mutex.try_lock()) {
 			return false;
 		}
 
