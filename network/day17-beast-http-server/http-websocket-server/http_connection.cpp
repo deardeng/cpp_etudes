@@ -71,7 +71,7 @@ void http_connection::process_request()
 		response_.set(http::field::server, "Beast");
 		create_response();
 		break;
-..
+
 	default:
 		// We return responses indicating an error if
 		// we do not recognize the request method.
