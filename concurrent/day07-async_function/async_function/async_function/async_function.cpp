@@ -153,7 +153,7 @@ std::list<T> thread_pool_quick_sort(std::list<T> input)
 	lower_part.splice(lower_part.end(), input, input.begin(),
 		divide_point);
 	// ①因为lower_part是副本，所以并行操作不会引发逻辑错误，这里投递给线程池处理
-	auto new_lower = ThreadPool::commit(&parallel_quick_sort<T>, std::move(lower_part));
+	auto new_lower = ThreadPool::instance().commit(&parallel_quick_sort<T>, std::move(lower_part));
 	// ②
 	auto new_higher(
 		parallel_quick_sort(std::move(input)));
@@ -164,7 +164,7 @@ std::list<T> thread_pool_quick_sort(std::list<T> input)
 
 void test_thread_pool_sort() {
 	std::list<int> numlists = { 6,1,0,7,5,2,9,-1 };
-	auto sort_result = parallel_quick_sort(numlists);
+	auto sort_result = thread_pool_quick_sort(numlists);
 	std::cout << "sorted result is ";
 	for (auto iter = sort_result.begin(); iter != sort_result.end(); iter++) {
 		std::cout << " " << (*iter);
@@ -174,9 +174,9 @@ void test_thread_pool_sort() {
 
 int main()
 {
-	test_quick_sort();
-	test_sequential_quick();
-	test_parallen_sort();
+	//test_quick_sort();
+	//test_sequential_quick();
+	//test_parallen_sort();
 	test_thread_pool_sort();
 }
 
