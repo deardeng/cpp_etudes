@@ -1,6 +1,5 @@
 ﻿// day10-MemoryModel.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
-#include <iostream>
 
 #include <iostream>
 #include <atomic>
@@ -72,9 +71,6 @@ void read_y_then_x() {
 
 
 void TestOrderRelaxed() {
-	x = false;
-	y = false;
-	z = 0;
 
 	std::thread t1(write_x_then_y);
 	std::thread t2(read_y_then_x);
@@ -145,7 +141,7 @@ int  Add() {
 
 int main()
 {
-	//TestSpinLock();
+	TestSpinLock();
 	//TestOrderRelaxed();
 	//TestOderRelaxed2();
 	//Add();

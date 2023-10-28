@@ -197,9 +197,9 @@ int main()
 	//ChangeValue();
 	//DeadLock();
 	//first_method();
-	/*TestParallen1();
-	std::this_thread::sleep_for(std::chrono::seconds(4));*/
-	TestParallen2();
+	//TestParallen1();
+	//std::this_thread::sleep_for(std::chrono::seconds(4));
+	//TestParallen2();
     std::cout << "Main Exited!\n";
 }
 
