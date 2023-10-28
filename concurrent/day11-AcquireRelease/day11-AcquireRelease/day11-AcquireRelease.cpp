@@ -40,6 +40,7 @@ void TestOrderSeqCst() {
 void TestOrderRelaxed() {
 	std::atomic<bool> rx, ry;
 
+	//sequenc before
 	std::thread t1([&]() {
 		rx.store(true, std::memory_order_relaxed); // 1
 		ry.store(true, std::memory_order_relaxed); // 2
@@ -65,6 +66,7 @@ void TestReleaseAcquire() {
 
 
 	std::thread t2([&]() {
+		//sequence -before
 		while (!ry.load(std::memory_order_acquire)); //3
 		assert(rx.load(std::memory_order_relaxed)); //4
 		});
@@ -75,62 +77,6 @@ void TestReleaseAcquire() {
 
 
 void ReleasAcquireDanger() {
-	std::atomic<bool> xd, yd;
-	std::atomic<int> zd;
-
-	std::thread  t1([&]() {
-		xd.store(true, std::memory_order_release);
-	});
-
-	std::thread t2([&]() {
-		yd.store(true, std::memory_order_release);
-		});
-
-	std::thread t3([&]() {
-		while (!xd.load(std::memory_order_acquire)); // (3)
-		if (yd.load(std::memory_order_acquire)) ++zd; // (4)
-		});
-
-	std::thread t4([&]() {
-		while (!yd.load(std::memory_order_acquire)); // (5)
-		if (xd.load(std::memory_order_acquire)) ++zd; // (6)
-		});
-
-	t1.join();
-	t2.join();
-	t3.join();
-	t4.join();
-
-	assert(zd.load() != 0);
-}
-
-void ReleasAcquireSafe() {
-	std::atomic<bool> xd, yd;
-	std::atomic<int> zd;
-
-	std::thread  t1([&]() {
-		xd.store(true, std::memory_order_release); //（1）
-		yd.store(true, std::memory_order_release); // （2）
-		});
-
-	std::thread t3([&]() {
-		while (!xd.load(std::memory_order_acquire)); // (3)
-		if (yd.load(std::memory_order_acquire)) ++zd; // (4)
-		});
-
-	std::thread t4([&]() {
-		while (!yd.load(std::memory_order_acquire)); // (5)
-		if (xd.load(std::memory_order_acquire)) ++zd; // (6)
-		});
-
-	t1.join();
-	t3.join();
-	t4.join();
-
-	assert(zd.load() != 0);
-}
-
-void ReleasAcquireDanger2() {
 	std::atomic<int> xd{0}, yd{ 0 };
 	std::atomic<int> zd;
 
@@ -160,7 +106,7 @@ void ReleaseSequence() {
 	
 	std::thread t1([&]() {
 		data.push_back(42);  //(1)
-		flag.store(1, std::memory_order_release); //(2)
+		flag.store(1, std::memory_order_release); //(2) A
 		});
 
 	std::thread t2([&]() {
@@ -275,30 +221,33 @@ public:
 	static std::shared_ptr<SingleMemoryModel> GetInst()
 	{
 		// 1 处
-		if (single != nullptr)
+		if (_b_init.load(std::memory_order_acquire))
 		{
 			return single;
 		}
 		// 2 处
 		s_mutex.lock();
 		// 3 处
-		if (single != nullptr)
+		if (_b_init.load(std::memory_order_relaxed))
 		{
 			s_mutex.unlock();
 			return single;
 		}
 		// 4处
 		single = std::shared_ptr<SingleMemoryModel>(new SingleMemoryModel);
+		_b_init.store(true, std::memory_order_release);
 		s_mutex.unlock();
 		return single;
 	}
 private:
 	static std::shared_ptr<SingleMemoryModel> single;
 	static std::mutex s_mutex;
+	static std::atomic<bool> _b_init ;
 };
 
 std::shared_ptr<SingleMemoryModel> SingleMemoryModel::single = nullptr;
 std::mutex SingleMemoryModel::s_mutex;
+std::atomic<bool> SingleMemoryModel::_b_init = false;
 
 
 void TestSingleMemory() {
@@ -316,11 +265,10 @@ void TestSingleMemory() {
 
 int main()
 {
+	//TestOrderSeqCst();
 	//TestOrderRelaxed();
 	//TestReleaseAcquire();
 	//ReleasAcquireDanger();
-	//ReleasAcquireSafe();
-	//ReleasAcquireDanger2();
 	//ReleaseSequence();
 	//TestSingle();
 	TestSingleMemory();
