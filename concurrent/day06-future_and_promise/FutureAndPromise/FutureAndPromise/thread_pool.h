@@ -22,16 +22,7 @@ public:
 
     using Task = std::packaged_task<void()>;
 
-    ThreadPool(unsigned int num = 5)
-        : stop_(false) {
-        {
-            if (num < 1)
-                thread_num_ = 1;
-            else
-                thread_num_ = num;
-        }
-        start();
-    }
+
     ~ThreadPool() {
         stop();
     }
@@ -59,6 +50,16 @@ public:
     }
 
 private:
+    ThreadPool(unsigned int num = 5)
+        : stop_(false) {
+            {
+                if (num < 1)
+                    thread_num_ = 1;
+                else
+                    thread_num_ = num;
+            }
+            start();
+    }
     void start() {
         for (int i = 0; i < thread_num_; ++i) {
             pool_.emplace_back([this]() {
