@@ -13,15 +13,7 @@ public:
     CircularQueSeq& operator = (const CircularQueSeq&) = delete;
 
     ~CircularQueSeq() {
-        //循环销毁
-        bool use_expected = false;
-        bool use_desired = true;
-        do
-        {
-            use_expected = false;
-            use_desired = true;
-        }
-        while (!_atomic_using.compare_exchange_strong(use_expected, use_desired));
+
         //调用内部元素的析构函数
         while (_head != _tail) {
             std::allocator<T>::destroy(_data + _head);
@@ -30,12 +22,7 @@ public:
         //调用回收操作
         std::allocator<T>::deallocate(_data, _max_size);
 
-        do
-        {
-            use_expected = true;
-            use_desired = false;
-        }
-        while (!_atomic_using.compare_exchange_strong(use_expected, use_desired));
+     
     }
 
     //先实现一个可变参数列表版本的插入函数最为基准函数
