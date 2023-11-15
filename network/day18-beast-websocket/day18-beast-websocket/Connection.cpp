@@ -1,6 +1,6 @@
 #include "Connection.h"
 #include "ConnectionMgr.h"
-Connection::Connection(net::io_context& ioc):_ioc(ioc),
+Connection::Connection(boost::asio::io_context& ioc):_ioc(ioc),
 _ws_ptr(std::make_unique<stream<tcp_stream>>(make_strand(ioc)))
 {
 	// 生成随机的 UUID
@@ -16,7 +16,7 @@ std::string Connection::GetUid()
 	return _uuid;
 }
 
-net::ip::tcp::socket& Connection::GetSocket()
+boost::asio::ip::tcp::socket& Connection::GetSocket()
 {
 	auto &socket = boost::beast:: get_lowest_layer(*_ws_ptr).socket();
 	return socket;
@@ -76,6 +76,12 @@ void Connection::AsyncSend(std::string msg)
 		}
 	}
 
+	SendCallBack(std::move(msg));
+}
+
+
+void Connection::SendCallBack(std::string msg)
+{
 	auto self = shared_from_this();
 	_ws_ptr->async_write(boost::asio::buffer(msg.c_str(), msg.length()),
 		[self](error_code  err, std::size_t  nsize) {
@@ -97,7 +103,7 @@ void Connection::AsyncSend(std::string msg)
 					send_msg = self->_send_que.front();
 				}
 
-				self->AsyncSend(std::move(send_msg));
+				self->SendCallBack(std::move(send_msg));
 			}
 			catch (std::exception& exp) {
 				std::cout << "async send exception is " << exp.what() << std::endl;
@@ -105,4 +111,3 @@ void Connection::AsyncSend(std::string msg)
 			}
 		});
 }
-
