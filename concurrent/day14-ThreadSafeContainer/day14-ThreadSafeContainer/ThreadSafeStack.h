@@ -9,6 +9,7 @@ struct empty_stack : std::exception
 {
     const char* what() const throw();
 };
+
 template<typename T>
 class threadsafe_stack
 {

@@ -138,6 +138,7 @@ private:
 		std::shared_ptr<T> data;
 		std::unique_ptr<node> next;
 	};
+
 	std::mutex head_mutex;
 	std::unique_ptr<node> head;
 	std::mutex tail_mutex;
@@ -155,12 +156,15 @@ private:
 		head = std::move(old_head->next);
 		return old_head;
 	}
-		std::unique_lock<std::mutex> wait_for_data()   
+
+	std::unique_lock<std::mutex> wait_for_data()   
 	{
 		std::unique_lock<std::mutex> head_lock(head_mutex);
 		data_cond.wait(head_lock,[&] {return head.get() != get_tail(); });
 		return std::move(head_lock);   
 	}
+
+
 		std::unique_ptr<node> wait_pop_head()
 		{
 			std::unique_lock<std::mutex> head_lock(wait_for_data());   
@@ -230,16 +234,22 @@ public:
 		return (head.get() == get_tail());
 	}
 
-	void push(T new_value)  //<------2
+
+
+	void push(T new_value) //<------2
 	{
 		std::shared_ptr<T> new_data(
 			std::make_shared<T>(std::move(new_value)));
 		std::unique_ptr<node> p(new node);
-		node* const new_tail = p.get();
-		std::lock_guard<std::mutex> tail_lock(tail_mutex);
-		tail->data = new_data;
-		tail->next = std::move(p);
-		tail = new_tail;
+		{
+			std::lock_guard<std::mutex> tail_lock(tail_mutex);
+			tail->data = new_data;
+			node* const new_tail = p.get();
+			tail->next = std::move(p);
+			tail = new_tail;
+		}
+
+		data_cond.notify_one();
 	}
 };
 
