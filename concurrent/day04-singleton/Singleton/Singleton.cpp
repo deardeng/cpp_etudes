@@ -329,8 +329,8 @@ int main()
 {
 	//test_single2hungry();
 	//test_singlelazy();
-	//TestSingle();
-	SingleAutoSafe::GetInst();
+	TestSingle();
+	//SingleAutoSafe::GetInst();
 }
 
 
