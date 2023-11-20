@@ -187,6 +187,7 @@ public:
 		delete sf;
 	}
 };
+
 class SingleAutoSafe
 {
 private:
@@ -226,6 +227,9 @@ private:
 	static std::shared_ptr<SingleAutoSafe> single;
 	static std::mutex s_mutex;
 };
+
+std::shared_ptr<SingleAutoSafe> SingleAutoSafe::single = nullptr;
+std::mutex SingleAutoSafe::s_mutex;
 
 //但是上面的代码存在危险，比如懒汉式的使用方式，当多个线程调用单例时，有一个线程加锁进入3处的逻辑。
 //其他的线程有的在1处，判断指针非空则跳过初始化直接使用单例的内存会存在问题。
@@ -325,7 +329,8 @@ int main()
 {
 	//test_single2hungry();
 	//test_singlelazy();
-	TestSingle();
+	//TestSingle();
+	SingleAutoSafe::GetInst();
 }
 
 
