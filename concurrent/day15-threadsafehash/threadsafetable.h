@@ -1,6 +1,15 @@
 #pragma once
 #include <iostream>
 
+#include <thread>
+#include <vector>
+#include <list>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <iterator>
+#include <map>
+
 template<typename Key, typename Value, typename Hash = std::hash<Key>>
 class threadsafe_lookup_table
 {
@@ -9,6 +18,7 @@ private:
 	// 桶类型
 	class bucket_type
 	{
+		friend class threadsafe_lookup_table;
 	private:
 		//存储元素的类型为pair，由key和value构成
 		typedef std::pair<Key, Value> bucket_value;
@@ -21,7 +31,7 @@ private:
 		//改用共享锁
 		mutable std::shared_mutex mutex;
 		//查找操作，在list中找到匹配的key值，然后返回迭代器
-		bucket_iterator find_entry_for(Key const& key) const
+		bucket_iterator find_entry_for(const Key & key)
 		{
 			return std::find_if(data.begin(), data.end(),
 				[&](bucket_value const& item)
@@ -29,7 +39,7 @@ private:
 		}
 	public:
 		//查找key值，找到返回对应的value，未找到则返回默认值
-		Value value_for(Key const& key, Value const& default_value) const
+		Value value_for(Key const& key, Value const& default_value) 
 		{
 			std::shared_lock<std::shared_mutex> lock(mutex);
 			bucket_iterator const found_entry = find_entry_for(key);
@@ -85,20 +95,46 @@ public:
 			buckets[i].reset(new bucket_type);
 		}
 	}
+
 	threadsafe_lookup_table(threadsafe_lookup_table const& other) = delete;
 	threadsafe_lookup_table& operator=(
 		threadsafe_lookup_table const& other) = delete;
+
 	Value value_for(Key const& key,
-		Value const& default_value = Value()) const
+		Value const& default_value = Value()) 
 	{
 		return get_bucket(key).value_for(key, default_value);
 	}
+
 	void add_or_update_mapping(Key const& key, Value const& value)
 	{
 		get_bucket(key).add_or_update_mapping(key, value);
 	}
+
 	void remove_mapping(Key const& key)
 	{
 		get_bucket(key).remove_mapping(key);
+	}
+
+	std::map<Key, Value> get_map() 
+	{
+		std::vector<std::unique_lock<std::shared_mutex>> locks;
+		for (unsigned i = 0; i < buckets.size(); ++i)
+		{
+			locks.push_back(
+				std::unique_lock<std::shared_mutex>(buckets[i]->mutex));
+		}
+		std::map<Key, Value> res;
+		for (unsigned i = 0; i < buckets.size(); ++i)
+		{
+			//需用typename告诉编译器bucket_type::bucket_iterator是一个类型，以后再实例化
+			//当然此处可简写成auto it = buckets[i]->data.begin();
+			typename bucket_type::bucket_iterator it = buckets[i]->data.begin();
+			for (;it != buckets[i]->data.end();++it)
+			{
+				res.insert(*it);
+			}
+		}
+		return res;
 	}
 };
