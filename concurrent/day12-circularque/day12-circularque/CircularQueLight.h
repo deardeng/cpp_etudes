@@ -77,7 +77,7 @@ public:
         {
             tailup = t;
 
-        } while (_tail_update.compare_exchange_strong(tailup, 
+        } while (!_tail_update.compare_exchange_strong(tailup, 
             (tailup + 1) % _max_size));
 
         std::cout << "called push data success " << val << std::endl;
