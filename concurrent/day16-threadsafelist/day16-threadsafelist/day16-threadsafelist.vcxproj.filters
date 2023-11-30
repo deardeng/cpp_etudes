@@ -26,7 +26,7 @@
     <ClInclude Include="MyClass.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="doublepushlist.h">
+    <ClInclude Include="tailpushlist.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

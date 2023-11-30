@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "threadsafelist.h"
-#include "doublepushlist.h"
+#include "tailpushlist.h"
 #include "MyClass.h"
 #include <set>
 
