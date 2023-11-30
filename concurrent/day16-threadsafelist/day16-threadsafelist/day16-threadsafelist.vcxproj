@@ -143,7 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyClass.h" />
-    <ClInclude Include="threadsafedoublelist.h" />
+    <ClInclude Include="doublepushlist.h" />
     <ClInclude Include="threadsafelist.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
