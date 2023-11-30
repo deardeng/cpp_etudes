@@ -20,7 +20,7 @@ public:
         //调用内部元素的析构函数
         while (_head != _tail) {
             std::allocator<T>::destroy(_data + _head);
-            _head = (_head++)%_max_size;
+            _head = (++_head)%_max_size;
         }
         //调用回收操作
         std::allocator<T>::deallocate(_data, _max_size);
@@ -78,7 +78,7 @@ public:
         {
             tailup = t;
 
-        } while (_tail_update.compare_exchange_strong(tailup,
+        } while (!_tail_update.compare_exchange_strong(tailup,
             (tailup + 1) % _max_size, std::memory_order_release, std::memory_order_relaxed)); //7
 
         std::cout << "called push data success " << val << std::endl;

@@ -178,6 +178,16 @@ void TestCircularQueSync()
 
         std::cout << "pop success, " << mc1 << std::endl;
     }
+
+	for (int i = 0; i < 4; i++)
+	{
+		MyClass mc1(i);
+		auto res = cq_seq.push(mc1);
+		if (!res)
+		{
+			break;
+		}
+	}
 }
 
 
