@@ -6,6 +6,7 @@
 #include "tailpushlist.h"
 #include "MyClass.h"
 #include <set>
+#include "tailpushlist.h"
 
 std::set<int> removeSet;
 void TestThreadSafeList()
@@ -49,13 +50,68 @@ void TestThreadSafeList()
 
 }
 
+
+void TestTailPush()
+{
+	double_push_list<MyClass> thread_safe_list;
+	for(int i = 0; i < 10; i++)
+	{
+
+		MyClass mc(i);
+		thread_safe_list.push_front(mc);
+	}
+
+	thread_safe_list.for_each([](const MyClass & mc)
+	{
+			std::cout << "for each print " << mc << std::endl;
+	});
+
+
+	for(int i = 10; i < 20; i++)
+	{
+		MyClass mc(i);
+		thread_safe_list.push_back(mc);
+	}
+
+	thread_safe_list.for_each([](const MyClass& mc)
+		{
+			std::cout << "for each print " << mc << std::endl;
+		});
+
+	auto find_data = thread_safe_list.find_first_if([](const MyClass& mc)
+		{
+			return (mc.GetData() == 19);
+		});
+
+	if(find_data)
+	{
+		std::cout << "find_data is " << find_data->GetData() << std::endl;
+	}
+
+
+	thread_safe_list.insert_if([](const MyClass& mc)
+		{
+			return (mc.GetData() == 19);
+		},20);
+
+
+	thread_safe_list.for_each([](const MyClass& mc)
+		{
+			std::cout << "for each print " << mc << std::endl;
+		});
+}
+
 int main()
 {
-	TestThreadSafeList();
-	for(auto & v: removeSet)
-	{
-		std::cout << "remove data is " << v << std::endl;
-	}
+	//TestThreadSafeList();
+	//for(auto & v: removeSet)
+	//{
+	//	std::cout << "remove data is " << v << std::endl;
+	//}
+
+	TestTailPush();
+
+
     std::cout << "Hello World!\n";
 }
 

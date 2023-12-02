@@ -12,7 +12,7 @@ public:
 		return os;
 	}
 
-	int GetData()
+	int GetData() const
 	{
 		return _data;
 	}
