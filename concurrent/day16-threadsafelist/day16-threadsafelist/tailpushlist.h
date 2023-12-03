@@ -124,6 +124,36 @@ public:
 		}
 	}
 
+	template<typename Predicate>
+	bool remove_first(Predicate p)
+	{
+		node_d* current = &head;
+		std::unique_lock<std::mutex> lk(head.m);
+		while (node_d* const next = current->next.get())
+		{
+			std::unique_lock<std::mutex> next_lk(next->m);
+			if (p(*next->data))
+			{
+				std::unique_ptr<node_d> old_next = std::move(current->next);
+				current->next = std::move(next->next);
+				//判断删除的是否为最后一个节点
+				if (current->next == nullptr) {
+					std::lock_guard<std::mutex> last_lk(last_ptr_mtx);
+					last_node_ptr = &head;
+				}
+				next_lk.unlock();
+
+				return true;
+			}
+
+			lk.unlock();
+			current = next;
+			lk = std::move(next_lk);
+		}
+
+		return false;
+	}
+
 	//从断言处查询满足条件的第一个点之前插入
 	template<typename Predicate>
 	void insert_if(Predicate p, T const & value)
