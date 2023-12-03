@@ -111,7 +111,7 @@ public:
 				//判断删除的是否为最后一个节点
 				if (current->next == nullptr) {
 					std::lock_guard<std::mutex> last_lk(last_ptr_mtx);
-					last_node_ptr = &head;
+					last_node_ptr = current;
 				}
 				next_lk.unlock();
 			}
@@ -139,7 +139,7 @@ public:
 				//判断删除的是否为最后一个节点
 				if (current->next == nullptr) {
 					std::lock_guard<std::mutex> last_lk(last_ptr_mtx);
-					last_node_ptr = &head;
+					last_node_ptr = current;
 				}
 				next_lk.unlock();
 
