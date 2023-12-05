@@ -2,7 +2,7 @@
 //
 
 #include <iostream>
-
+#include "LockFreeStack.h"
 int main()
 {
     std::cout << "Hello World!\n";
