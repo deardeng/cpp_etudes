@@ -204,6 +204,7 @@ std::shared_ptr<T> pop() {
 2 如果仅有一个线程执行pop操作，那么待删列表可以被删除，如果有多个线程执行pop操作，那么待删列表不可被删除。
 
 我们需要用一个原子变量threads_in_pop记录有几个线程执行pop操作。在pop结束后再减少threads_in_pop。
+我们需要一个原子变量to_be_deleted记录待删列表的首节点。
 
 那么我们先实现一个改造版本
 ``` cpp
@@ -231,3 +232,8 @@ std::shared_ptr<T> pop() {
 	return res;
 }
 ```
+1  在1处我们对原子变量threads_in_pop增加以表示线程执行pop函数。
+2  在2处我们将head数据load给old_head。如果old_head为空则直接返回。
+3  3处通过head和old_head作比较，如果相等则交换，否则重新do while循环。这么做的目的是为了防止多线程访问，保证只有一个线程将head更新为old_head的下一个节点。
+4  将old_head的数据data交换给res。
+5  try_reclaim函数就是删除old_head或者将其放入待删列表，以及判断是否删除待删列表。
