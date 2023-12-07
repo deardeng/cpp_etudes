@@ -47,7 +47,7 @@ public:
 
     void try_reclaim(node* old_head)
 	{
-        //1 原子变量模糊判断仅有一个线程进入
+        //1 原子变量判断仅有一个线程进入
 		if(threads_in_pop == 1)
 		{
 			//2 当前线程把待删列表取出
@@ -60,67 +60,53 @@ public:
             }else if(nodes_to_delete)
             {
 	            //5 如果pop还有其他线程调用且待删列表不为空，
-	            //则将待删列表首届点更新给to_be_deleted
+	            //则将待删列表首节点更新给to_be_deleted
                 chain_pending_nodes(nodes_to_delete);
             }
+            delete old_head;
+        }
+        else {
+            //多个线程pop竞争head节点，此时不能删除old_head
+            //将其放入待删列表
+            chain_pending_node(old_head);
+            --threads_in_pop;
+        }
+	}
+
+	static void delete_nodes(node* nodes)
+	{
+		while (nodes)
+		{
+			node* next = nodes->next;
+			delete nodes;
+			nodes = next;
 		}
 	}
+
+	void chain_pending_node(node* n)
+	{
+		chain_pending_nodes(n, n);   
+	}
+
+	void chain_pending_nodes(node* first, node* last)
+	{
+		//1 先将last的next节点更新为待删列表的首节点
+		last->next = to_be_deleted;    
+		//2  借循环保证 last->next指向正确
+		// 将待删列表的首节点更新为first节点
+		while (!to_be_deleted.compare_exchange_weak(
+			last->next, first));     
+	}
+
+	void chain_pending_nodes(node* nodes)
+	{
+		node* last = nodes;
+		//1 沿着next指针前进到链表末端
+		while (node* const next = last->next)    
+		{
+			last = next;
+		}
+		//2 将链表放入待删链表中
+		chain_pending_nodes(nodes, last);
+	}
 };
-
-
-template<typename T>
-class lock_free_stack
-{
-private:
-    std::atomic<node*> to_be_deleted;
-    static void delete_nodes(node* nodes)
-    {
-        while (nodes)
-        {
-            node* next = nodes->next;
-            delete nodes;
-            nodes = next;
-        }
-    }
-    void try_reclaim(node* old_head)
-    {
-        if (threads_in_pop == 1)    ⇽-- - ①
-        {
-            node * nodes_to_delete = to_be_deleted.exchange(nullptr);    ⇽-- - ②当前线程把候删链表收归己有
-            if (!--threads_in_pop)    ⇽-- - ③pop()是否仅仅正被当前线程唯一地调用
-            {
-                delete_nodes(nodes_to_delete);    ⇽-- - ④
-            }
-            else if (nodes_to_delete)    ⇽-- - ⑤
-            {
-                chain_pending_nodes(nodes_to_delete);    ⇽-- - ⑥
-            }
-            delete old_head;     ⇽-- - ⑦
-        }
-        else
-        {
-            chain_pending_node(old_head);    ⇽-- - ⑧
-                --threads_in_pop;
-        }
-    }
-    void chain_pending_nodes(node* nodes)
-    {
-        node* last = nodes;
-        while (node* const next = last->next)    ⇽-- - ⑨沿着next指针前进到候删链表末端
-        {
-            last = next;
-        }
-        chain_pending_nodes(nodes, last);
-    }
-    void chain_pending_nodes(node* first, node* last)
-    {
-        last->next = to_be_deleted;    ⇽-- - ⑩
-            while (!to_be_deleted.compare_exchange_weak(
-                last->next, first));     ⇽-- - ⑪借循环保证 last->next指向正确
-    }
-    void chain_pending_node(node* n)
-    {
-        chain_pending_nodes(n, n);    ⇽-- - ⑫
-    }
-};
-

@@ -78,7 +78,9 @@ void push(const T& value){
 单线程情况下pop操作的顺序
 
 1 取出头节点元素
+
 2 更新head为下一个节点。
+
 3 返回取出头节点元素的数据域。
 
 多线程情况下，第1，2点同样存在线程安全问题。此外我们返回节点数据域时会进行拷贝赋值，如果出现异常会造成数据丢失，这一点也要考虑。
@@ -152,9 +154,12 @@ public:
 	}
 };
 ```
-简单描述下pop函数的功能， 
+简单描述下pop函数的功能，
+
 1 处初始化一个临时old_head的变量，  
+
 2 处加载head节点
+
 3 处通过比较和交换操作，判断head和old_head是否相等，如相等则将head更新为old_head的next节点。如不相等，将old_head更新为head的值(compare_exchange_weak自动帮我们做了),再次进入循环。尽管2处又加载了一次head的值给old_head有些重复，但是为了代码的可读性和指针判空，我觉得这么写更合适一点。
 
 资源回收的问题我们还没处理。
@@ -201,6 +206,7 @@ std::shared_ptr<T> pop() {
 那基于上述三点，我们可以简单理解为
 
 1 如果head已经被更新，且旧head不会被其他线程引用，那旧head就可以被删除。否则放入待删列表。
+
 2 如果仅有一个线程执行pop操作，那么待删列表可以被删除，如果有多个线程执行pop操作，那么待删列表不可被删除。
 
 我们需要用一个原子变量threads_in_pop记录有几个线程执行pop操作。在pop结束后再减少threads_in_pop。
@@ -233,7 +239,178 @@ std::shared_ptr<T> pop() {
 }
 ```
 1  在1处我们对原子变量threads_in_pop增加以表示线程执行pop函数。
+
 2  在2处我们将head数据load给old_head。如果old_head为空则直接返回。
+
 3  3处通过head和old_head作比较，如果相等则交换，否则重新do while循环。这么做的目的是为了防止多线程访问，保证只有一个线程将head更新为old_head的下一个节点。
+
 4  将old_head的数据data交换给res。
+
 5  try_reclaim函数就是删除old_head或者将其放入待删列表，以及判断是否删除待删列表。
+
+接下来我们实现try_reclaim函数
+
+``` cpp
+void try_reclaim(node* old_head)
+{
+    //1 原子变量判断仅有一个线程进入
+	if(threads_in_pop == 1)
+	{
+		//2 当前线程把待删列表取出
+        node* nodes_to_delete = to_be_deleted.exchange(nullptr);
+        //3 更新原子变量获取准确状态，判断pop是否仅仅正被当前线程唯一调用
+        if(!--threads_in_pop)
+        {
+	        //4 如果唯一调用则将待删列表删除
+            delete_nodes(nodes_to_delete);
+        }else if(nodes_to_delete)
+        {
+	        //5 如果pop还有其他线程调用且待删列表不为空，
+	        //则将待删列表首节点更新给to_be_deleted
+            chain_pending_nodes(nodes_to_delete);
+        }
+        delete old_head;
+    }
+    else {
+        //多个线程pop竞争head节点，此时不能删除old_head
+        //将其放入待删列表
+        chain_pending_node(old_head);
+        --threads_in_pop;
+    }
+}
+```
+
+1 1处我们判断pop的线程数是否为1，并没有采用load，也就是即便判断的时候其他线程也可以pop，这样不影响效率，即便模糊判断threads_in_pop为1，同一时刻threads_in_pop可能会增加也没关系，threads_in_pop为1仅表示当前时刻走入1处逻辑之前仅有该线程执行pop，那说明没有其他线程竞争head，head已经被更新为新的值，其他线程之后pop读取的head和我们要删除的old_head不是同一个，就是可以被直接删除的。
+
+2 处我们将当前待删除的列表交换给本线程的nodes_to_delete临时变量，表示接管待删除列表。但是能否删除还要判断是不是仅有本线程在执行pop。
+
+3 处更新原子变量获取准确状态，判断pop是否仅仅正被当前线程唯一调用，如果是被唯一调用则删除待删列表，否则将nodes_to_delete临时变量再更新回待删列表。(因为可能有多个线程会用待删列表中的节点)
+
+接下来我们实现delete_nodes函数, 该函数用来删除以nodes为首节点的链表，该函数写成了static函数，也可以用普通函数。
+
+``` cpp
+static void delete_nodes(node* nodes)
+{
+	while (nodes)
+	{
+		node* next = nodes->next;
+		delete nodes;
+		nodes = next;
+	}
+}
+```
+接下来实现chain_pending_node函数，该函数用来将单个节点放入待删列表
+
+``` cpp
+void chain_pending_node(node* n)
+{
+	chain_pending_nodes(n, n);   
+}
+```
+
+chain_pending_nodes接受两个参数，分别为链表的头和尾。
+
+``` cpp
+void chain_pending_nodes(node* first, node* last)
+{
+	//1 先将last的next节点更新为待删列表的首节点
+	last->next = to_be_deleted;    
+	//2  借循环保证 last->next指向正确
+	// 将待删列表的首节点更新为first节点
+	while (!to_be_deleted.compare_exchange_weak(
+		last->next, first));     
+}
+```
+1 处将last->next的值更新为to_be_deleted, 这么做的一个好处是如果有其他线程修改了to_be_deleted.能保证当前线程的last->next指向的是最后修改的to_be_deleted，达到链接待删列表的作用。
+
+2 处可能更新失败，因为其他线程修改了to_be_deleted的值，但是不要紧，我们再次循环直到匹配last->next的值为to_be_deleted为止，将to_be_deleted更新为first的值。
+
+接下来我们还要实现将nodes_to_delete为首的链表还原到待删列表中, 函数为chain_pending_nodes接受一个参数为待还原的链表的首节点
+
+``` cpp
+void chain_pending_nodes(node* nodes)
+{
+	node* last = nodes;
+	//1 沿着next指针前进到链表末端
+	while (node* const next = last->next)    
+	{
+		last = next;
+	}
+	//2 将链表放入待删链表中
+	chain_pending_nodes(nodes, last);
+}
+```
+## 分析
+
+上面的无锁栈存在一个问题，就是当多个线程pop时将要删除的节点放入待删列表中，如果每次pop都会被多个线程调用，则要删除的节点就会一直往待删除列表中增加，导致待删除列表无法被回收。这个问题我们可以考虑当pop执行结束时最后一个线程回收待删列表。留作下一节分析。
+
+我们先写一个函数测试以下
+
+``` cpp
+void TestLockFreeStack() {
+
+    lock_free_stack<int> lk_free_stack;
+    std::set<int>  rmv_set;
+    std::mutex set_mtx;
+
+    std::thread t1([&]() {
+        for (int i = 0; i < 20000; i++) {
+            lk_free_stack.push(i);
+            std::cout << "push data " << i << " success!" << std::endl;
+            }
+        });
+
+    std::thread t2([&]() {
+		for (int i = 0; i < 10000;) {
+            auto head = lk_free_stack.pop();
+            if (!head) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+            }
+			std::lock_guard<std::mutex> lock(set_mtx);
+			rmv_set.insert(*head);
+            std::cout << "pop data " << *head << " success!" << std::endl;
+            i++;
+		}
+      });
+
+	std::thread t3([&]() {
+		for (int i = 0; i < 10000;) {
+			auto head = lk_free_stack.pop();
+            if (!head) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                continue;
+            }
+            std::lock_guard<std::mutex> lock(set_mtx);
+            rmv_set.insert(*head);
+            std::cout << "pop data " << *head << " success!" << std::endl;
+            i++;
+		}
+		});
+
+    t1.join();
+    t2.join();
+    t3.join();
+
+    assert(rmv_set.size() == 20000);
+}
+```
+1 线程t1将0到20000个数放入集合中。
+2 线程t2和t3分别出栈10000次。
+3 最后我们断言集合的大小为20000.
+
+测试结果如下
+
+![https://cdn.llfc.club/1701936298395.jpg](https://cdn.llfc.club/1701936298395.jpg)
+
+可以看到我们的集合大小为20000，且数据唯一。
+
+## 总结
+
+源码链接:
+
+https://gitee.com/secondtonone1/boostasio-learn/tree/master/concurrent/day16-threadsafelist
+
+视频链接
+
+https://space.bilibili.com/271469206/channel/collectiondetail?sid=1623290
