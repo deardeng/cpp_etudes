@@ -409,7 +409,7 @@ void TestLockFreeStack() {
 
 源码链接:
 
-https://gitee.com/secondtonone1/boostasio-learn/tree/master/concurrent/day16-threadsafelist
+https://gitee.com/secondtonone1/boostasio-learn/tree/master/concurrent/day17-LockFreeStack
 
 视频链接
 
