@@ -18,6 +18,7 @@ void TestLockFreeStack() {
         for (int i = 0; i < 20000; i++) {
             lk_free_stack.push(i);
             std::cout << "push data " << i << " success!" << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
         });
 
