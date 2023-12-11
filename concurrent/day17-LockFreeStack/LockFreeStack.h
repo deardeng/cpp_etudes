@@ -30,6 +30,7 @@ public:
 		do {
 			old_head = head.load();  //2 加载head节点给旧head存储
 			if (old_head == nullptr) {
+				--threads_in_pop;
 				return nullptr; 
 			}
 		} while (!head.compare_exchange_weak(old_head, old_head->next)); // 3	比较更新head为旧head的下一个节点	
