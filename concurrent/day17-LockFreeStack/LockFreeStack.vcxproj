@@ -142,6 +142,7 @@
     <ClCompile Include="LockFreeStack.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HazardPointerStack.h" />
     <ClInclude Include="LockFreeStack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

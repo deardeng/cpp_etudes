@@ -7,6 +7,7 @@
 #include <set>
 #include <mutex>
 #include <cassert>
+#include "HazardPointerStack.h"
 
 void TestLockFreeStack() {
 
@@ -59,7 +60,7 @@ void TestLockFreeStack() {
 
 int main()
 {
-    TestLockFreeStack();
+    //TestLockFreeStack();
     std::cout << "Hello World!\n";
 }
 
