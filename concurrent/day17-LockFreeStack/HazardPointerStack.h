@@ -13,7 +13,7 @@ struct hazard_pointer {
 	std::atomic<void*>  pointer;
 };
 //风险指针数组
-hazard_pointer hazard_pointers[max_hazard_pointers];
+extern hazard_pointer hazard_pointers[max_hazard_pointers];
 //风险指针持有类
 class hp_owner {
 public:
