@@ -144,6 +144,8 @@
   <ItemGroup>
     <ClInclude Include="HazardPointerStack.h" />
     <ClInclude Include="LockFreeStack.h" />
+    <ClInclude Include="RefCountStack.h" />
+    <ClInclude Include="SingleRefStack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

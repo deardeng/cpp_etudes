@@ -8,6 +8,9 @@
 #include <mutex>
 #include <cassert>
 #include "HazardPointerStack.h"
+#include "RefCountStack.h"
+#include "SingleRefStack.h"
+
 
 hazard_pointer hazard_pointers[max_hazard_pointers];
 
@@ -109,10 +112,109 @@ void TestHazardPointer() {
     assert(rmv_set.size() == 20000);
 }
 
+void TestRefCountStack() {
+    ref_count_stack<int>  ref_count_stack;
+	std::set<int>  rmv_set;
+	std::mutex set_mtx;
+
+	std::thread t1([&]() {
+		for (int i = 0; i < 20000; i++) {
+            ref_count_stack.push(i);
+			std::cout << "push data " << i << " success!" << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+		});
+
+	std::thread t2([&]() {
+		for (int i = 0; i < 10000;) {
+			auto head = ref_count_stack.pop();
+			if (!head) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::lock_guard<std::mutex> lock(set_mtx);
+			rmv_set.insert(*head);
+			std::cout << "pop data " << *head << " success!" << std::endl;
+			i++;
+		}
+		});
+
+	std::thread t3([&]() {
+		for (int i = 0; i < 10000;) {
+			auto head = ref_count_stack.pop();
+			if (!head) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::lock_guard<std::mutex> lock(set_mtx);
+			rmv_set.insert(*head);
+			std::cout << "pop data " << *head << " success!" << std::endl;
+			i++;
+		}
+		});
+
+	t1.join();
+	t2.join();
+	t3.join();
+
+	assert(rmv_set.size() == 20000);
+}
+
+void TestSingleRefStack() {
+	single_ref_stack<int>  single_ref_stack;
+	std::set<int>  rmv_set;
+	std::mutex set_mtx;
+
+	std::thread t1([&]() {
+		for (int i = 0; i < 20000; i++) {
+			single_ref_stack.push(i);
+			std::cout << "push data " << i << " success!" << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+		});
+
+	std::thread t2([&]() {
+		for (int i = 0; i < 10000;) {
+			auto head = single_ref_stack.pop();
+			if (!head) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::lock_guard<std::mutex> lock(set_mtx);
+			rmv_set.insert(*head);
+			std::cout << "pop data " << *head << " success!" << std::endl;
+			i++;
+		}
+		});
+
+	std::thread t3([&]() {
+		for (int i = 0; i < 10000;) {
+			auto head = single_ref_stack.pop();
+			if (!head) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::lock_guard<std::mutex> lock(set_mtx);
+			rmv_set.insert(*head);
+			std::cout << "pop data " << *head << " success!" << std::endl;
+			i++;
+		}
+		});
+
+	t1.join();
+	t2.join();
+	t3.join();
+
+	assert(rmv_set.size() == 20000);
+}
+
 int main()
 {
     //TestLockFreeStack();
-    TestHazardPointer();
+   // TestHazardPointer();
+   // TestRefCountStack();
+	//单引用的方式会导致崩溃
+	TestSingleRefStack();
     std::cout << "Hello World!\n";
 }
 
