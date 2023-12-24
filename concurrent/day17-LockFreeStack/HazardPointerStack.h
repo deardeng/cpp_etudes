@@ -24,10 +24,6 @@ public:
 	}
 
 	std::atomic<void*>& get_pointer() {
-		if (!(hp->pointer.load())) {
-			bind_hazard_pointer();
-		}
-
 		return hp->pointer;
 	}
 
