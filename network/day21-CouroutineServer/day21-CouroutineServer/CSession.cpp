@@ -42,7 +42,7 @@ std::string& CSession::GetUuid() {
 void CSession::Start() {
 	auto shared_this = shared_from_this();
 	//开启接收协程
-	co_spawn(_io_context, [=]()->awaitable<void> {
+	co_spawn(_io_context, [shared_this,this]()->awaitable<void> {
 		try {
 			for (;!_b_close;) {
 				_recv_head_node->Clear();
