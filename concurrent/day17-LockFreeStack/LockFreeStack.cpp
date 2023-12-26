@@ -208,13 +208,77 @@ void TestSingleRefStack() {
 	assert(rmv_set.size() == 20000);
 }
 
+void TestReleaseSeq() {
+	int data = 0;
+	std::atomic<int> flag = 0;
+	std::thread t1([&]() {
+		data = 42;  //1
+		flag.store(1, std::memory_order_release); //2
+		});
+
+	std::thread  t2([&]() {
+		//3
+		while (!flag.load(std::memory_order_acquire));
+		//4 
+		assert(data == 42);
+	});
+
+	t1.join();
+	t2.join();
+}
+
+std::vector<int> queue_data;
+std::atomic<int> count;
+std::atomic<bool> store_finish = false;
+void populate_queue()
+{
+	unsigned const number_of_items = 20;
+	queue_data.clear();
+	for (unsigned i = 0; i < number_of_items; ++i)
+	{
+		queue_data.push_back(i);
+	}
+	// 1 最初的存储操作
+	count.store(number_of_items, std::memory_order_release);   
+	store_finish.store(true, std::memory_order_relaxed);
+}
+
+void consume_queue_items()
+{
+	while (true)
+	{
+		//2等待存储完成
+		while (!store_finish.load(std::memory_order_relaxed));
+
+		int item_index;
+		//3 读—改—写”操作
+		if ((item_index = count.fetch_sub(1, std::memory_order_acquire)) <= 0)   
+		{
+			return;
+		}
+		//4 从内部容器queue_data 读取数据项是安全行为
+		std::cout << "queue_data is  " << queue_data[item_index-1] << std::endl;
+	}
+}
+
+void TestReleaseSeq2() {
+	std::thread a(populate_queue);
+	std::thread b(consume_queue_items);
+	std::thread c(consume_queue_items);
+	a.join();
+	b.join();
+	c.join();
+}
+
+
 int main()
 {
     //TestLockFreeStack();
    // TestHazardPointer();
    // TestRefCountStack();
-	//单引用的方式会导致崩溃
-	TestSingleRefStack();
+	//TestSingleRefStack();
+	//TestReleaseSeq();
+	TestReleaseSeq2();
     std::cout << "Hello World!\n";
 }
 
