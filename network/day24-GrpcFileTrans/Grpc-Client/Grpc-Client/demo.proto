@@ -4,6 +4,7 @@ package hello;
 
 service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc Upload(stream Chunk) returns (Reply) {}
 }
 
 message HelloRequest {
@@ -12,4 +13,13 @@ message HelloRequest {
 
 message HelloReply {
   string message = 1;
+}
+
+message Chunk {
+  string filename = 1;
+  bytes buffer = 2;
+}
+
+message Reply{
+	int32 length = 1;
 }
