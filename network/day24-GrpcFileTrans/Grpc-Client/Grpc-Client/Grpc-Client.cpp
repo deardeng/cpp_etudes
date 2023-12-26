@@ -44,17 +44,18 @@ public:
 
 	void Upload();
 
+    void Upload(std::string filepath);
+
 private:
 	std::unique_ptr<Greeter::Stub> stub_;
 };
 
-void FCClient::Upload() {
+void FCClient::Upload(std::string filepath) {
     
         Chunk chunk;
         char data[CHUNK_SIZE];
         Reply stats;
         ClientContext context;
-        std::string filepath = "./1630026318562.jpg";
         std::ifstream infile;
         int len = 0;
 
@@ -100,6 +101,22 @@ void FCClient::Upload() {
 
         infile.close();
     
+}
+
+void FCClient::Upload()
+{
+    std::unordered_map<int, std::string> vis;
+	vis[1] = "./1630026318562.jpg";
+	vis[2] = "./a.jpg";
+	vis[3] = "./c.txt";
+
+	std::ifstream infile;
+    for (int i = 1; i <= 3; ++i) {
+        char data[CHUNK_SIZE];
+        std::string filepath = vis[i];
+        Upload(filepath);
+    }
+
 }
 
 int main(int argc, char* argv[]) {
