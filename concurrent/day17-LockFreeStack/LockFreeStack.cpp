@@ -274,11 +274,11 @@ void TestReleaseSeq2() {
 int main()
 {
     //TestLockFreeStack();
-   // TestHazardPointer();
-   // TestRefCountStack();
+    //TestHazardPointer();
+   TestRefCountStack();
 	//TestSingleRefStack();
 	//TestReleaseSeq();
-	TestReleaseSeq2();
+	//TestReleaseSeq2();
     std::cout << "Hello World!\n";
 }
 

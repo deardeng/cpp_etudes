@@ -32,7 +32,8 @@ public:
 			new_counter = old_counter;
 			++new_counter.external_count;
 		}//7  循环判断保证head和old_counter想等时做更新,多线程情况保证引用计数原子递增。
-		while (!head.compare_exchange_weak(old_counter,  new_counter));
+		while (!head.compare_exchange_strong(old_counter,  new_counter, 
+			std::memory_order_acquire, std::memory_order_relaxed));
 		//8  走到此处说明head的external_count已经被更新了
 		old_counter.external_count = new_counter.external_count;
 	}
@@ -47,22 +48,23 @@ public:
 				return std::shared_ptr<T>();
 			}
 
-			//本线程如果抢先完成head的更新
-			if (head.compare_exchange_strong(old_head, ptr->next)) {
+			//2 本线程如果抢先完成head的更新
+			if (head.compare_exchange_strong(old_head, ptr->next,  std::memory_order_relaxed)) {
 				//返回头部数据
 				std::shared_ptr<T> res;
 				//交换数据
 				res.swap(ptr->data);
-				//减少外部引用计数，先统计到目前为止增加了多少外部引用
+				//3 减少外部引用计数，先统计到目前为止增加了多少外部引用
 				int const count_increase = old_head.external_count - 2;
-				//将内部引用计数添加
-				if (ptr->internal_count.fetch_add(count_increase) == -count_increase) {
+				//4 将内部引用计数添加
+				if (ptr->internal_count.fetch_add(count_increase, std::memory_order_release) == -count_increase) {
 					delete  ptr;
 				}
 				return res;
-			} else if (ptr->internal_count.fetch_sub(1) == 1) {
+			} else if (ptr->internal_count.fetch_add(-1, std::memory_order_acquire) == 1) { //5
 				//如果当前线程操作的head节点已经被别的线程更新，则减少内部引用计数
 				//当前线程减少内部引用计数，返回之前值为1说明指针仅被当前线程引用
+				ptr->internal_count.load(std::memory_order_acquire);
 				delete ptr;
 			}
 		}
@@ -86,7 +88,8 @@ public:
 		new_node.ptr = new count_node(data);
 		new_node.external_count = 1;
 		new_node.ptr->next = head.load();
-		while (!head.compare_exchange_weak(new_node.ptr->next, new_node));
+		while (!head.compare_exchange_weak(new_node.ptr->next, new_node, 
+			std::memory_order_release, std::memory_order_relaxed));
 	}
 
 	
