@@ -65,7 +65,13 @@ private:
             {
                 //3
                 delete this;
-                destruct_count++;
+                std::cout << "delete success" << std::endl;
+                destruct_count.fetch_add(1);
+            }
+            else {
+                std::cout << "exteranal_counters are " << new_counter.external_counters << std::endl;
+
+                std::cout << "internal_count are " << new_counter.internal_count << std::endl;
             }
         }
     };
@@ -114,8 +120,14 @@ private:
             !new_counter.external_counters)
         {
             //⇽---  4
-            destruct_count++;
+            destruct_count.fetch_add(1);
+            std::cout << "delete success" << std::endl;
             delete ptr;
+        }
+        else {
+            std::cout << "exteranal_counters are " << new_counter.external_counters << std::endl;
+
+            std::cout << "internal_count are " << new_counter.internal_count << std::endl;
         }
     }
 
