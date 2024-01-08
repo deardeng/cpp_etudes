@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include<atomic>
 #include<memory>
+#include <cassert>
 
 template<typename T>
 class lock_free_queue
@@ -18,6 +19,12 @@ private:
 
     struct counted_node_ptr
     {
+        //存在破坏trivial class 的风险
+        /*bool operator == (const counted_node_ptr& cnp) {
+            return (external_count == cnp.external_count && ptr == cnp.ptr);
+        }*/
+
+        counted_node_ptr():external_count(0), ptr(nullptr) {}
         int external_count;
         node* ptr;
     };
@@ -38,8 +45,8 @@ private:
             count.store(new_count);
 
             counted_node_ptr node_ptr;
-            node_ptr.ptr = nullptr;
-            node_ptr.external_count = 0;
+			node_ptr.ptr = nullptr;
+			node_ptr.external_count = 0;
 
             next.store(node_ptr);
         }
@@ -47,6 +54,7 @@ private:
 
         void release_ref()
         {
+            std::cout << "call release ref " << std::endl;
             node_counter old_counter =
                 count.load(std::memory_order_relaxed);
             node_counter new_counter;
@@ -65,13 +73,8 @@ private:
             {
                 //3
                 delete this;
-                std::cout << "delete success" << std::endl;
+                std::cout << "release_ref delete success" << std::endl;
                 destruct_count.fetch_add(1);
-            }
-            else {
-                std::cout << "exteranal_counters are " << new_counter.external_counters << std::endl;
-
-                std::cout << "internal_count are " << new_counter.internal_count << std::endl;
             }
         }
     };
@@ -99,6 +102,7 @@ private:
 
     static void free_external_counter(counted_node_ptr& old_node_ptr)
     {
+        std::cout << "call  free_external_counter " << std::endl;
         node* const ptr = old_node_ptr.ptr;
         int const count_increase = old_node_ptr.external_count - 2;
         node_counter old_counter =
@@ -121,14 +125,10 @@ private:
         {
             //⇽---  4
             destruct_count.fetch_add(1);
-            std::cout << "delete success" << std::endl;
+            std::cout << "free_external_counter delete success" << std::endl;
             delete ptr;
         }
-        else {
-            std::cout << "exteranal_counters are " << new_counter.external_counters << std::endl;
 
-            std::cout << "internal_count are " << new_counter.internal_count << std::endl;
-        }
     }
 
 
@@ -150,15 +150,18 @@ private:
 public:
     lock_free_queue() {
        
-        counted_node_ptr new_next;
-        new_next.ptr = new node();
-        new_next.external_count = 1;
-        tail.store(new_next);
-        head.store(new_next);
+		counted_node_ptr new_next;
+		new_next.ptr = new node();
+		new_next.external_count = 1;
+		tail.store(new_next);
+		head.store(new_next);
+        std::cout << "new_next.ptr is " << new_next.ptr << std::endl;
     }
 
     ~lock_free_queue() {
         while (pop());
+        auto head_counted_node = head.load();
+        delete head_counted_node.ptr;
     }
 
     void push(T new_value)
@@ -176,7 +179,8 @@ public:
             if (old_tail.ptr->data.compare_exchange_strong(
                 old_data, new_data.get()))
             {
-                counted_node_ptr old_next = { 0 };
+                counted_node_ptr old_next;
+                counted_node_ptr now_next = old_tail.ptr->next.load();
                 //⇽---  7
                 if (!old_tail.ptr->next.compare_exchange_strong(
                     old_next, new_next))
@@ -191,7 +195,7 @@ public:
             }
             else    // ⇽---  10
             {
-                counted_node_ptr old_next = { 0 };
+                counted_node_ptr old_next ;
                 // ⇽--- 11
                 if (old_tail.ptr->next.compare_exchange_strong(
                     old_next, new_next))
@@ -217,6 +221,8 @@ public:
                 node* const ptr = old_head.ptr;
                 if (ptr == tail.load().ptr)
                 {
+                    //头尾相等说明队列为空，要减少内部引用计数
+                    ptr->release_ref();
                     return std::unique_ptr<T>();
                 }
                 //  ⇽---  2
