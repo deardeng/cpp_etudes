@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include<atomic>
 #include<memory>
-
+//单线程消费，单线程生产的队列
 template<typename T>
 class SinglePopPush
 {
