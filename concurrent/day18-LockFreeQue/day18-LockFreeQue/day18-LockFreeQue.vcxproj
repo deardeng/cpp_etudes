@@ -142,7 +142,9 @@
     <ClCompile Include="day18-LockFreeQue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="crushque.h" />
     <ClInclude Include="lockfreeque.h" />
+    <ClInclude Include="memoryleakque.h" />
     <ClInclude Include="singlepushpop.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

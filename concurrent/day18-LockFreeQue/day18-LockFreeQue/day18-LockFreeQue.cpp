@@ -6,6 +6,9 @@
 #include <thread>
 #include "lockfreeque.h"
 #include <cassert>
+#include "crushque.h"
+#include "memoryleakque.h"
+
 
 void TestSinglePopPush() {
     SinglePopPush<int>  que;
@@ -176,13 +179,85 @@ void TestLockFreeQueMultiPushPop() {
 	assert(que.destruct_count == TESTCOUNT * 200);
 }
 
+
+void TestCrushQue() {
+	crush_que<int>  que;
+	std::thread t1([&]() {
+		for (int i = 0; i < TESTCOUNT*10000; i++) {
+			que.push(i);
+			std::cout << "push data is " << i << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		});
+
+
+
+	std::thread t2([&]() {
+		for (int i = 0; i < TESTCOUNT*10000;) {
+			auto p = que.pop();
+			if (p == nullptr) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			i++;
+			std::cout << "pop data is " << *p << std::endl;
+		}
+		});
+
+	t1.join();
+	t2.join();
+
+}
+
+void TestLeakQue() {
+	memoryleak_que<int>  que;
+	std::thread t1([&]() {
+		for (int i = 0; i < TESTCOUNT ; i++) {
+			que.push(i);
+			std::cout << "push data is " << i << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		});
+
+
+
+	std::thread t2([&]() {
+		for (int i = 0; i < TESTCOUNT ;) {
+			auto p = que.pop();
+			if (p == nullptr) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			i++;
+			std::cout << "pop data is " << *p << std::endl;
+		}
+		});
+
+	t1.join();
+	t2.join();
+
+	assert(que.destruct_count == TESTCOUNT );
+
+}
+
 int main()
 {
-    //TestSinglePopPush();
+	//测试单线程pop和单线程push
+	//TestSinglePopPush();
+
+	//测试崩溃版本
+	//TestCrushQue();
+
+	//测试内存泄露版本
+	//TestLeakQue();
+
+
     //TestLockFreeQue();
    // TestLockFreeQueBase();
 	//TestLockFreeQueMultiPop();
+	//测试多个生产和多个消费线程
 	TestLockFreeQueMultiPushPop();
+	
     std::cout << "Hello World!\n";
 }
 

@@ -26,5 +26,11 @@
     <ClInclude Include="lockfreeque.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="crushque.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memoryleakque.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

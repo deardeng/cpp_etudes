@@ -1,10 +1,13 @@
 ﻿#pragma once
+#pragma once
+
 #include<atomic>
 #include<memory>
 #include <cassert>
 
+//注意： 该队列引发崩溃，仅做错误示范不能用于生产
 template<typename T>
-class lock_free_queue
+class memoryleak_que
 {
 private:
 
@@ -19,13 +22,6 @@ private:
 
     struct counted_node_ptr
     {
-        //存在破坏trivial class 的风险
-        /*bool operator == (const counted_node_ptr& cnp) {
-            return (external_count == cnp.external_count && ptr == cnp.ptr);
-        }*/
-
-        //构造初始化各成员
-        counted_node_ptr():external_count(0), ptr(nullptr) {}
         int external_count;
         node* ptr;
     };
@@ -46,8 +42,8 @@ private:
             count.store(new_count);
 
             counted_node_ptr node_ptr;
-			node_ptr.ptr = nullptr;
-			node_ptr.external_count = 0;
+            node_ptr.ptr = nullptr;
+            node_ptr.external_count = 0;
 
             next.store(node_ptr);
         }
@@ -133,7 +129,6 @@ private:
 
     }
 
-
     static void increase_external_count(
         std::atomic<counted_node_ptr>& counter,
         counted_node_ptr& old_counter)
@@ -150,17 +145,16 @@ private:
     }
 
 public:
-    lock_free_queue() {
-       
-		counted_node_ptr new_next;
-		new_next.ptr = new node();
-		new_next.external_count = 1;
-		tail.store(new_next);
-		head.store(new_next);
+    memoryleak_que() {
+        counted_node_ptr new_next;
+        new_next.ptr = new node();
+        new_next.external_count = 1;
+        tail.store(new_next);
+        head.store(new_next);
         std::cout << "new_next.ptr is " << new_next.ptr << std::endl;
     }
 
-    ~lock_free_queue() {
+    ~memoryleak_que() {
         while (pop());
         auto head_counted_node = head.load();
         delete head_counted_node.ptr;
@@ -181,7 +175,7 @@ public:
             if (old_tail.ptr->data.compare_exchange_strong(
                 old_data, new_data.get()))
             {
-                counted_node_ptr old_next;
+                counted_node_ptr old_next = { 0 };
                 counted_node_ptr now_next = old_tail.ptr->next.load();
                 //⇽---  7
                 if (!old_tail.ptr->next.compare_exchange_strong(
@@ -197,7 +191,7 @@ public:
             }
             else    // ⇽---  10
             {
-                counted_node_ptr old_next ;
+                counted_node_ptr old_next = { 0 };
                 // ⇽--- 11
                 if (old_tail.ptr->next.compare_exchange_strong(
                     old_next, new_next))
@@ -217,30 +211,30 @@ public:
     std::unique_ptr<T> pop()
     {
         counted_node_ptr old_head = head.load(std::memory_order_relaxed);
-            for (;;)
+        for (;;)
+        {
+            increase_external_count(head, old_head);
+            node* const ptr = old_head.ptr;
+            if (ptr == tail.load().ptr)
             {
-                increase_external_count(head, old_head);
-                node* const ptr = old_head.ptr;
-                if (ptr == tail.load().ptr)
-                {
-                    //头尾相等说明队列为空，要减少内部引用计数
-                    ptr->release_ref();
-                    return std::unique_ptr<T>();
-                }
-                //  ⇽---  2
-                counted_node_ptr next = ptr->next.load();
-                if (head.compare_exchange_strong(old_head, next))
-                {
-                    T* const res = ptr->data.exchange(nullptr);
-                    free_external_counter(old_head);
-                    return std::unique_ptr<T>(res);
-                }
-                ptr->release_ref();
+                //头尾相等说明队列为空，要减少内部引用计数
+              // ptr->release_ref();
+                return std::unique_ptr<T>();
             }
+            //  ⇽---  2
+            counted_node_ptr next = ptr->next.load();
+            if (head.compare_exchange_strong(old_head, next))
+            {
+                T* const res = ptr->data.exchange(nullptr);
+                free_external_counter(old_head);
+                return std::unique_ptr<T>(res);
+            }
+            ptr->release_ref();
+        }
     }
 
     static std::atomic<int> destruct_count;
 };
 
 template<typename T>
-std::atomic<int> lock_free_queue<T>::destruct_count = 0;
+std::atomic<int> memoryleak_que<T>::destruct_count = 0;

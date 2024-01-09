@@ -40,7 +40,7 @@ private:
             new_count.external_counters = external_count;
             count.store(new_count);
 
-            counted_node_ptr node_ptr;
+            counted_node_ptr node_ptr ;
             node_ptr.ptr = nullptr;
             node_ptr.external_count = 0;
 
@@ -132,7 +132,7 @@ private:
         std::atomic<counted_node_ptr>& counter,
         counted_node_ptr& old_counter)
     {
-        counted_node_ptr new_counter;
+        counted_node_ptr new_counter ;
         do
         {
             new_counter = old_counter;
@@ -146,24 +146,15 @@ private:
 public:
     crush_que() {
 
-        counted_node_ptr new_next;
-        new_next.ptr = new node();
-        new_next.external_count = 1;
-        tail.store(new_next);
-        head.store(new_next);
-        std::cout << "new_next.ptr is " << new_next.ptr << std::endl;
     }
 
     ~crush_que() {
-        while (pop());
-        auto head_counted_node = head.load();
-        delete head_counted_node.ptr;
     }
 
     void push(T new_value)
     {
         std::unique_ptr<T> new_data(new T(new_value));
-        counted_node_ptr new_next;
+        counted_node_ptr new_next ;
         new_next.ptr = new node;
         new_next.external_count = 1;
         counted_node_ptr old_tail = tail.load();
@@ -175,7 +166,7 @@ public:
             if (old_tail.ptr->data.compare_exchange_strong(
                 old_data, new_data.get()))
             {
-                counted_node_ptr old_next;
+                counted_node_ptr old_next = {0};
                 counted_node_ptr now_next = old_tail.ptr->next.load();
                 //⇽---  7
                 if (!old_tail.ptr->next.compare_exchange_strong(
@@ -191,7 +182,7 @@ public:
             }
             else    // ⇽---  10
             {
-                counted_node_ptr old_next;
+                counted_node_ptr old_next = { 0 };
                 // ⇽--- 11
                 if (old_tail.ptr->next.compare_exchange_strong(
                     old_next, new_next))
@@ -237,4 +228,4 @@ public:
 };
 
 template<typename T>
-std::atomic<int> lock_free_queue<T>::destruct_count = 0;
+std::atomic<int> crush_que<T>::destruct_count = 0;
