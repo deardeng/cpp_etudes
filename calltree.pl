@@ -31,6 +31,7 @@
 # /calltree.pl 'fsync' '' 1 1 4
 #
 
+use 5.010;
 use warnings;
 use strict;
 use Data::Dumper;
@@ -245,6 +246,7 @@ sub gen_re_func_def_name() {
   my $re_func_def = "";
   $re_func_def .= "^.*?($RE_SCOPED_IDENTIFIER|$RE_OVERLOAD_OPERATOR) $RE_WS* $RE_NESTED_PARENTHESES";
   $re_func_def =~ s/ //g;
+  # say ("dx test xxxxx $re_func_def");
   return $re_func_def;
 }
 
@@ -587,6 +589,7 @@ sub merge_lines_multiline_break_enabled(\@) {
     if (!defined($three_parts[$i])) {
       if (defined($prev_file)) {
         # $i-1 is last line of a match block
+        # say ("dx rrrrrrrrrr $prev_file, $prev_lineno, $three_parts[$i - 1][1], $prev_line");
         push @result, [ $prev_file, $prev_lineno, $three_parts[$i - 1][1], $prev_line ];
         ($prev_file, $prev_lineno, $prev_line) = (undef, undef, undef);
       }
@@ -650,8 +653,16 @@ sub merge_lines(\@) {
 
 sub extract_all_callees($$) {
   my ($line, $re_func_call) = @_;
+  # say "dx test = $line\n";
   my @callees = ();
   while ($line =~ /$re_func_call/g) {
+    # say "call=$1, name=$3";
+    # if(defined($2)){
+    #   say "prefix=$2";
+    # }
+    # if ($1 ne $3) {
+    #   say "fuck call $1 name $3 and line $line";
+    # }
     push @callees, { call => $1, prefix => $2, name => $3 };
   }
   return @callees;
@@ -704,6 +715,7 @@ sub extract_all_funcs(\%$$) {
   printf "function definition after merge: %d\n", scalar(@func_file_line_def);
 
   my $re_func_def_name = qr!$RE_FUNC_DEFINITION_NAME!;
+  # my @func_def = map {say ("dx test $_->[0], $_->[1], $_->[2], $_->[3]"); $_->[3]} @func_file_line_def;
   my @func_def = map {$_->[3]} @func_file_line_def;
   my @func_name = map {$_ =~ $re_func_def_name;
     $1} @func_def;
@@ -713,6 +725,7 @@ sub extract_all_funcs(\%$$) {
   printf "process callees: begin\n";
   my @func_callees = map {
     my (undef, @rest) = extract_all_callees($_, $re_func_call);
+    # say ("dx debug @rest");
     [ @rest ]
   } @func_def;
   printf "process callees: end\n";
@@ -729,11 +742,18 @@ sub extract_all_funcs(\%$$) {
     is_pure_name($_) && ($func_count{$_} > $trivial_threshold || length($_) < $length_threshold)
   } (keys %func_count);
 
+  # while ((my $key, my $value) = each (%trivial))
+  # {
+    # $value = $trivial{$key};
+    # print "dx debug $key => $value\n";
+  # }
+
   my %ignored = (%$ignored, %trivial);
   my %reserved = map {$_ => simple_name($_)} grep {!exists $ignored{$_}} (keys %func_count);
 
   my @func_file_line = map {$_->[0] . ":" . $_->[1]} @func_file_line_def;
   my @func_simple_name = map {simple_name($_)} @func_name;
+  # say ("dx test length", scalar(@func_file_line), " <-> ", scalar(@func_name));
 
   my %calling = ();
   my %called = ();
@@ -752,7 +772,12 @@ sub extract_all_funcs(\%$$) {
     my ($file, $start_lineno, $end_lineno) = @{$func_file_line_def[$i]}[0 .. 2];
 
     my @callees = @{$func_callees[$i]};
-    foreach my $seq (0 .. $#callees) {$callees[$seq]{seq} = $seq}
+    # say ("dx test $#callees");
+    foreach my $seq (0 .. $#callees) {
+      # say("dx test callees $callees[$seq]");
+      $callees[$seq]{seq} = $seq;
+      # say("dx seq ", $seq, " ", $callees[$seq]{seq})
+    }
 
     my %callees = map {
       if (defined($_->{prefix})) {
