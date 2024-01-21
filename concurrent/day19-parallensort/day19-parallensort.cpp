@@ -62,8 +62,8 @@ void test_thread_pool_sort() {
 int main()
 {
 	TestParallenSort();
-	test_parallen_sort();
-	test_thread_pool_sort();
+	//test_parallen_sort();
+	//test_thread_pool_sort();
 }
 
 

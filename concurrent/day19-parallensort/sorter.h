@@ -6,7 +6,7 @@
 #include <memory>
 
 template<typename T>
-struct sorter    
+struct sorter  //1  
 {
 	struct chunk_to_sort
 	{
