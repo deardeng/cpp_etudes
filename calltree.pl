@@ -38,6 +38,12 @@ use Data::Dumper;
 use List::Util qw/max/;
 use Storable qw/freeze thaw nstore retrieve/;
 
+use Data::Printer {
+    index => 1,     # 不要输出数组索引
+    hash_separator => '=> ',  # hash元素的key和value分隔符
+    quote_keys     => 'auto',  # 自动加引号
+};
+
 sub red_color($) {
   my ($msg) = @_;
   "\e[95;31;1m$msg\e[m"
@@ -53,7 +59,23 @@ sub all(&;@) {
   my ($pred, @values) = @_;
   !(any {!$pred->($_)} @values);
 }
-
+# 这段代码实现了一个RAII（资源获取和初始化）模式，它是一种在Perl中用于管理资源的方法。RAII模式允许你通过在对象构造函数中调用一个资源获取函数来获取资源，并在对象析构时通过调用一个资源释放函数来释放这些资源。
+#
+# `RAII`包提供了一个`new`子routine，它接受三个参数：类名、构造函数的引用和资源释放函数的引用。`new`子routine首先调用构造函数，然后将资源释放函数存储在对象的字典中。
+#
+# `DESTROY`子routine是一个析构函数，它在对象被销毁时被调用。它首先局部化当前作用域，并将所有特殊变量（.$., $!., $?, $@., and $^E）的当前值存储在变量中。然后，它调用对象的字典中的资源释放函数。这样，你就可以在对象的生命周期中释放任何获取的资源。
+#
+# 使用`RAII`包的方法如下：
+#
+# ```Perl5
+#  use RAII 'MyClass';
+#
+#  my $obj = MyClass->new(\&my_constructor, \&my_unifier);
+#  #  usage with $obj
+#  $obj->destroy();
+#  ```
+#
+# 在这个例子中，`MyClass`是一个`RAII`的子类，它提供了`my_constructor`构造函数和`my_unifier`资源释放函数。`new`子routine创建了一个`MyClass`对象，并将`my_unifier`作为`unref`属性存储在对象的字典中。当对象被销毁时，`DESTROY`子routine会被调用，它首先调用`my_unifier`来释放资源，然后销毁对象。
 package RAII {
   sub new {
     my ($cls, $ref, $unref) = @_;
@@ -113,6 +135,9 @@ sub file_newer_than($$) {
   return (-M $file_a) < (-M $file_b);
 }
 
+# 这段代码的含义是检查当前脚本是否 newer than the given file. 这里的`+shift`是一个传递参数的方式，它表示将数组中的第一个元素作为参数传递给`file_newer_than`函数。`get_path_of_script()`是一个函数，它返回当前脚本的路径。
+#
+# 所以，这段代码的实际作用是检查当前脚本是否更新于指定的文件。
 sub file_newer_than_script($) {
   file_newer_than(+shift, get_path_of_script());
 }
@@ -1242,12 +1267,20 @@ sub fuzzy_called_tree($$$$$$) {
 
 sub search_called_tree($$$$$$) {
   my ($called, $name_pattern, $match_lines, $func_match_rule, $file_match_rule, $depth) = @_;
+  # p($called);
   my %nodes = map {($_, $_)} map {@$_} values %$called;
+  # p(%nodes);
+  # p($match_lines);
   my %match_lines = map {($_->[0], [])} @$match_lines;
+  # p(%match_lines);
+
   foreach (@$match_lines) {push @{$match_lines{$_->[0]}}, [ $_->[1], $_->[2] ]}
   my @nodes = values %nodes;
+  # p(@nodes);
   @nodes = grep {
     # eliminate the function definition if the name_pattern is just the proper name of the function.
+    p($name_pattern);
+    p($_->{name});
     $name_pattern ne $_->{name} && $name_pattern ne $_->{simple_name}
   } grep {
     my $n = $_;
@@ -1256,9 +1289,11 @@ sub search_called_tree($$$$$$) {
     }
     else {
       my @lineno = map {$_->[0]} @{$match_lines{$n->{file}}};
+      # p(@lineno);
       any {$n->{start_lineno} <= $_ && $_ <= $n->{end_lineno}} @lineno;
     }
   } @nodes;
+  p(@nodes);
 
   my @match_and_nodes = map {
     my $match_line = $_;
