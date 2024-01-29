@@ -80,6 +80,8 @@ void TestParallelPartialSum() {
     std::cout << std::endl;
 }
 
+
+
 int main()
 {
     TestParallenForEach();
@@ -87,6 +89,7 @@ int main()
     TestParallenFind(nvec);
     AsyncParallenFind(nvec);
     TestParallelPartialSum();
+
 }
 
 
