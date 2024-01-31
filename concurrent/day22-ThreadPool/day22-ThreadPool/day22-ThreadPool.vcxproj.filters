@@ -35,5 +35,8 @@
     <ClInclude Include="join_thread.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="FutureThreadPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

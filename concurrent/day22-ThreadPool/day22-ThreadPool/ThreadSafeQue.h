@@ -77,8 +77,8 @@ public:
 		head(new node), tail(head.get())
 	{}
 
-	threadsafe_queue(const threadsafe_queue_ht& other) = delete;
-	threadsafe_queue& operator=(const threadsafe_queue_ht& other) = delete;
+	threadsafe_queue(const threadsafe_queue& other) = delete;
+	threadsafe_queue& operator=(const threadsafe_queue& other) = delete;
 
 	std::shared_ptr<T> wait_and_pop() //  <------3
 	{
@@ -97,11 +97,16 @@ public:
 		std::unique_ptr<node> old_head = try_pop_head();
 		return old_head ? old_head->data : std::shared_ptr<T>();
 	}
+
 	bool try_pop(T& value)
 	{
 		std::unique_ptr<node> const old_head = try_pop_head(value);
-		return old_head;
+		if (old_head) {
+			return true;
+		}
+		return false;
 	}
+
 	bool empty()
 	{
 		std::lock_guard<std::mutex> head_lock(head_mutex);

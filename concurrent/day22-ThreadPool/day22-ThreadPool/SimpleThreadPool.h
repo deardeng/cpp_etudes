@@ -3,7 +3,7 @@
 #include "ThreadSafeQue.h"
 #include "join_thread.h"
 
-class thread_pool
+class simple_thread_pool
 {
     std::atomic_bool done;
     //⇽-- - 1
@@ -31,28 +31,33 @@ class thread_pool
             }
         }
     }
+
+	simple_thread_pool() :
+		done(false), joiner(threads)
+	{
+		//⇽--- 8
+		unsigned const thread_count = std::thread::hardware_concurrency();
+		try
+		{
+			for (unsigned i = 0; i < thread_count; ++i)
+			{
+				//⇽-- - 9
+				threads.push_back(std::thread(&simple_thread_pool::worker_thread, this));
+			}
+		}
+		catch (...)
+		{
+			//⇽-- - 10
+			done = true;
+			throw;
+		}
+	}
 public:
-    thread_pool() :
-        done(false), joiner(threads)
-    {
-        //⇽--- 8
-        unsigned const thread_count = std::thread::hardware_concurrency();    
-        try
-        {
-            for (unsigned i = 0; i < thread_count; ++i)
-            {
-                //⇽-- - 9
-                threads.push_back(std::thread(&thread_pool::worker_thread, this));     
-            }
-        }
-        catch (...)
-        {
-            //⇽-- - 10
-            done = true;    
-            throw;
-        }
+    static simple_thread_pool& instance() {
+       static  simple_thread_pool pool;
+       return pool;
     }
-    ~thread_pool()
+    ~simple_thread_pool()
     {
         //⇽-- - 11
         done = true;     
