@@ -6,6 +6,7 @@
 #include <vector>
 #include "SimpleThreadPool.h"
 #include "FutureThreadPool.h"
+#include "NotifyThreadPool.h"
 
 //使用最完善的线程池 实现并行for-each
 template<typename Iterator, typename Func>
@@ -132,4 +133,35 @@ void future_for_each(Iterator first, Iterator last, Func f) {
     for (auto& future : futures) {
         future.get();
     }
+}
+
+//基于作者思路优化的条件变量等待的线程池
+template<typename Iterator, typename Func>
+void notify_for_each(Iterator first, Iterator last, Func f) {
+	unsigned long const length = std::distance(first, last);
+	if (!length)
+		return;
+	unsigned long const min_per_thread = 25;
+	unsigned long const num_threads =
+		(length + min_per_thread - 1) / min_per_thread;
+
+	unsigned long const block_size = length / num_threads;
+	std::vector<std::future<void>> futures(num_threads - 1);   //⇽-- - 1
+	Iterator block_start = first;
+	for (unsigned long i = 0; i < (num_threads - 1); ++i)
+	{
+		Iterator block_end = block_start;
+		std::advance(block_end, block_size);
+
+		futures[i] = notify_thread_pool::instance().submit([=]()
+			{
+				std::for_each(block_start, block_end, f);
+			});
+
+		block_start = block_end;
+	}
+	std::for_each(block_start, last, f);
+	for (auto& future : futures) {
+		future.get();
+	}
 }

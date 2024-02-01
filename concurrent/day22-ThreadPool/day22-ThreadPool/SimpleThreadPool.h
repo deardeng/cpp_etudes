@@ -61,6 +61,11 @@ public:
     {
         //⇽-- - 11
         done = true;     
+		for (unsigned i = 0; i < threads.size(); ++i)
+		{
+			//⇽-- - 9
+            threads[i].join();
+		}
     }
     template<typename FunctionType>
     void submit(FunctionType f)

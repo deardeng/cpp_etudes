@@ -38,5 +38,11 @@
     <ClInclude Include="FutureThreadPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NotifyThreadPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickSort.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
