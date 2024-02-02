@@ -39,7 +39,6 @@ private:
 		return std::move(head_lock);   
 	}
 
-
 		std::unique_ptr<node> wait_pop_head()
 		{
 			std::unique_lock<std::mutex> head_lock(wait_for_data());   
@@ -58,7 +57,6 @@ private:
 			value = std::move(*head->data);
 			return pop_head();
 		}
-
 
 		std::unique_ptr<node> try_pop_head()
 		{
@@ -96,6 +94,23 @@ public:
 	void Exit() {
 		bstop.store(true);
 		data_cond.notify_all();
+	}
+
+	bool wait_and_pop_timeout(T& value) {
+		std::unique_lock<std::mutex> head_lock(head_mutex);
+		auto res = data_cond.wait_for(head_lock, std::chrono::milliseconds(100),
+				[&] {return head.get() != get_tail() || bstop.load() == true; });
+		if (res == false) {
+			return false;
+		}
+
+		if (bstop.load()) {
+			return false;
+		}
+		 
+		value = std::move(*head->data);	
+		head = std::move(head->next);
+		return true;
 	}
 
 	std::shared_ptr<T> wait_and_pop() //  <------3
@@ -137,8 +152,6 @@ public:
 		std::lock_guard<std::mutex> head_lock(head_mutex);
 		return (head.get() == get_tail());
 	}
-
-
 
 	void push(T new_value) //<------2
 	{

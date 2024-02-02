@@ -146,6 +146,7 @@
     <ClInclude Include="join_thread.h" />
     <ClInclude Include="NotifyThreadPool.h" />
     <ClInclude Include="ParallenForeach.h" />
+    <ClInclude Include="ParallenThreadPool.h" />
     <ClInclude Include="QuickSort.h" />
     <ClInclude Include="SimpleThreadPool.h" />
     <ClInclude Include="ThreadPool.h" />
