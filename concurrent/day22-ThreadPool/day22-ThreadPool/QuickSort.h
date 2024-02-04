@@ -48,7 +48,7 @@ struct sorter
 			divide_point);
 		std::future<std::list<T> > new_lower = parrallen_thread_pool::instance().submit(std::bind(&sorter::do_sort, this,
 			std::move(new_lower_chunk)));
-		std::list<T> new_higher(do_sort(chunk_data));
+		std::list<T> new_higher(do_sort_parallen_pool(chunk_data));
 		result.splice(result.end(), new_higher);
 		result.splice(result.begin(), new_lower.get());
 		return result;

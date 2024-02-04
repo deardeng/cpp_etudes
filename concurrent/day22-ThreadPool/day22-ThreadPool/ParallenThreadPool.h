@@ -9,27 +9,18 @@ class parrallen_thread_pool
 {
 private:
 
-	//void run_pending_task() {
-	//	function_wrapper task;
-	//	if (local_work_que && !local_work_que->empty()) {
-	//		task = std::move(local_work_que->front());
-	//		local_work_que->pop();
-	//		task();
-	//	}
-	//	else {
-	//		if (global_work_que.wait_and_pop_timeout(task)) {
-	//			task();
-	//		}
-	//	}
-	//}
-
-	void worker_thread()
+	void worker_thread(int index)
 	{
-		//local_work_que.reset(new local_queue_type);
-		//while (!done)
-		//{
-		//	run_pending_task();
-		//}
+		while (!done)
+		{
+
+			auto task_ptr = thread_work_ques[index].wait_and_pop();
+			if (task_ptr == nullptr) {
+				continue;
+			}
+
+			(*task_ptr)();
+		}
 	}
 public:
 
@@ -41,7 +32,10 @@ public:
 	{
 		//⇽-- - 11
 		done = true;
-		global_work_que.Exit();
+		for (unsigned i = 0; i < thread_work_ques.size(); i++) {
+			thread_work_ques[i].Exit();
+		}
+		
 		for (unsigned i = 0; i < threads.size(); ++i)
 		{
 			//⇽-- - 9
@@ -53,33 +47,29 @@ public:
 	std::future<typename std::result_of<FunctionType()>::type>
 		submit(FunctionType f)
 	{
+		int index = (atm_index.load() + 1) % thread_work_ques.size();
+		atm_index.store(index);
 		typedef typename std::result_of<FunctionType()>::type result_type;
 		std::packaged_task<result_type()> task(std::move(f));
 		std::future<result_type> res(task.get_future());
-		if (local_work_que) {
-			local_work_que->push(std::move(task));
-		}
-		else {
-			global_work_que.push(std::move(task));
-		}
-
+		thread_work_ques[index].push(std::move(task));
 		return res;
 	}
 
 private:
 	parrallen_thread_pool() :
-		done(false), joiner(threads)
+		done(false), joiner(threads), atm_index(0)
 	{
 		//⇽--- 8
 		unsigned const thread_count = std::thread::hardware_concurrency();
 		try
 		{
-			thread_work_ques = std::vector<>
+			thread_work_ques = std::vector < threadsafe_queue<function_wrapper>>(thread_count);
 
 			for (unsigned i = 0; i < thread_count; ++i)
 			{
 				//⇽-- - 9
-				threads.push_back(std::thread(&parrallen_thread_pool::worker_thread, this));
+				threads.push_back(std::thread(&parrallen_thread_pool::worker_thread, this, i));
 			}
 		}
 		catch (...)
@@ -101,4 +91,5 @@ private:
 	std::vector<std::thread> threads;
 	//⇽-- - 3
 	join_threads joiner;
+	std::atomic<int>  atm_index;
 };
