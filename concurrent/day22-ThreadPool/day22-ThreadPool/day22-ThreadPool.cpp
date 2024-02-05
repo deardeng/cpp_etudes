@@ -6,6 +6,7 @@
 #include "SimpleThreadPool.h"
 #include "NotifyThreadPool.h"
 #include "QuickSort.h"
+#include "binddemo.h"
 
 void TestParallenForEach() {
 
@@ -120,6 +121,10 @@ void TestParrallenThreadPool() {
 	std::cout << std::endl;
 }
 
+void TestBindDemo() {
+	bindfunction();
+}
+
 int main()
 {
     TestParallenForEach();
@@ -129,6 +134,7 @@ int main()
 	TestNotifyThread();
 	TestQuickSort();
 	TestParrallenThreadPool();
+	TestBindDemo();
 }
 
 
