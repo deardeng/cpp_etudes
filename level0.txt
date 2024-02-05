@@ -1,0 +1,123 @@
+
+Query:
+  Summary:
+     - Query ID: 31316ed2-9dd9-11ec-bba3-00163e12238b
+     - Start Time: 2022-03-07 13:41:10
+     - End Time: 2022-03-07 13:41:10
+     - Total: 947ms
+     - Query Type: Query
+     - Query State: EOF
+     - StarRocks Version: UNKNOWN
+     - User: root
+     - Default Db: default_cluster:tpch
+     - Sql Statement: SELECT l_returnflag, l_linestatus, SUM(l_quantity) AS sum_qty     , SUM(l_extendedprice) AS sum_base_price     , SUM(l_extendedprice * (1 - l_discount)) AS sum_disc_price     , SUM(l_extendedprice * (1 - l_discount) * (1 + l_tax)) AS sum_charge     , AVG(l_quantity) AS avg_qty, AVG(l_extendedprice) AS avg_price     , AVG(l_discount) AS avg_disc, COUNT(*) AS count_order FROM lineitem WHERE l_shipdate &lt;= DATE '1998-12-01' GROUP BY l_returnflag, l_linestatus ORDER BY l_returnflag, l_linestatus
+  Execution Profile 31316ed2-9dd9-11ec-bba3-00163e12238b:(Active: 938.713ms[938713632ns], % non-child: 100.00%)
+    Fragment 0:
+       - InstanceNum: 1
+       - MemoryLimit: 200.05 GB
+       - PeakMemoryUsage: 1.70 MB
+      Pipeline (id=0):
+         - ActiveTime: 210.13us
+         - DegreeOfParallelism: 1
+         - DriverTotalTime: 916.797ms
+         - PendingTime: 916.562ms
+         - TotalTime: 0ns
+        RESULT_SINK:
+          CommonMetrics:
+             - OperatorTotalTime: 80.391us
+        EXCHANGE_MERGE_SORT_SOURCE (plan_node_id=6):
+          CommonMetrics:
+             - OperatorTotalTime: 99.742us
+    Fragment 1:
+       - InstanceNum: 3
+       - MemoryLimit: 18.75 TB
+       - PeakMemoryUsage: 1.33 MB
+      Pipeline (id=2):
+         - ActiveTime: 98.161us
+         - DegreeOfParallelism: 3
+         - DriverTotalTime: 904.542ms
+         - PendingTime: 904.322ms
+         - TotalTime: 0ns
+        EXCHANGE_SINK (plan_node_id=6):
+          CommonMetrics:
+             - OperatorTotalTime: 68.120us
+        LOCAL_MERGE_SORT_SOURCE (plan_node_id=5):
+          CommonMetrics:
+             - OperatorTotalTime: 28.667us
+      Pipeline (id=1):
+         - ActiveTime: 19.221us
+           - __MAX_OF_ActiveTime: 459.246us
+           - __MIN_OF_ActiveTime: 1.902us
+         - DegreeOfParallelism: 96
+         - DriverTotalTime: 904.263ms
+         - PendingTime: 903.390ms
+         - TotalTime: 0ns
+        PARTITION_SORT_SINK (plan_node_id=5):
+          CommonMetrics:
+             - OperatorTotalTime: 6.886us
+               - __MAX_OF_OperatorTotalTime: 34.954us
+               - __MIN_OF_OperatorTotalTime: 3.794us
+        AGGREGATE_BLOCKING_SOURCE (plan_node_id=4):
+          CommonMetrics:
+             - OperatorTotalTime: 24.184us
+               - __MAX_OF_OperatorTotalTime: 283.929us
+               - __MIN_OF_OperatorTotalTime: 8.790us
+      Pipeline (id=0):
+         - ActiveTime: 227.88us
+           - __MAX_OF_ActiveTime: 5.907ms
+           - __MIN_OF_ActiveTime: 2.788us
+         - DegreeOfParallelism: 96
+         - DriverTotalTime: 906.9ms
+         - PendingTime: 902.688ms
+         - TotalTime: 0ns
+        AGGREGATE_BLOCKING_SINK (plan_node_id=4):
+          CommonMetrics:
+             - OperatorTotalTime: 168.437us
+               - __MAX_OF_OperatorTotalTime: 4.721ms
+               - __MIN_OF_OperatorTotalTime: 4.783us
+        EXCHANGE_SOURCE (plan_node_id=3):
+          CommonMetrics:
+             - OperatorTotalTime: 35.259us
+               - __MAX_OF_OperatorTotalTime: 660.469us
+               - __MIN_OF_OperatorTotalTime: 4.184us
+    Fragment 2:
+       - InstanceNum: 96
+       - MemoryLimit: 18.75 TB
+       - PeakMemoryUsage: 1.24 GB
+      Pipeline (id=1):
+         - ActiveTime: 866.229us
+           - __MAX_OF_ActiveTime: 14.489ms
+           - __MIN_OF_ActiveTime: 223.636us
+         - DegreeOfParallelism: 96
+         - DriverTotalTime: 688.950ms
+         - PendingTime: 687.826ms
+         - TotalTime: 0ns
+        EXCHANGE_SINK (plan_node_id=3):
+          CommonMetrics:
+             - OperatorTotalTime: 387.991us
+               - __MAX_OF_OperatorTotalTime: 12.803ms
+               - __MIN_OF_OperatorTotalTime: 138.926us
+        AGGREGATE_STREAMING_SOURCE (plan_node_id=2):
+          CommonMetrics:
+             - OperatorTotalTime: 461.729us
+               - __MAX_OF_OperatorTotalTime: 7.860ms
+               - __MIN_OF_OperatorTotalTime: 63.89us
+      Pipeline (id=0):
+         - ActiveTime: 560.869ms
+         - DegreeOfParallelism: 96
+         - DriverTotalTime: 685.984ms
+         - PendingTime: 116.268ms
+           - __MAX_OF_PendingTime: 283.181ms
+           - __MIN_OF_PendingTime: 1.717ms
+         - TotalTime: 0ns
+        AGGREGATE_STREAMING_SINK (plan_node_id=2):
+          CommonMetrics:
+             - OperatorTotalTime: 338.73ms
+        PROJECT (plan_node_id=1):
+          CommonMetrics:
+             - OperatorTotalTime: 212.396ms
+        OLAP_SCAN (plan_node_id=0):
+          CommonMetrics:
+             - OperatorTotalTime: 1.998ms
+               - __MAX_OF_OperatorTotalTime: 12.768ms
+               - __MIN_OF_OperatorTotalTime: 1.408ms
