@@ -135,6 +135,8 @@ int main()
 	TestQuickSort();
 	TestParrallenThreadPool();
 	TestBindDemo();
+	reference_collapsing();
+	reference_collapsing2();
 }
 
 
