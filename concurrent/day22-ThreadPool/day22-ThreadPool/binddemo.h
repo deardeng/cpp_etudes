@@ -63,3 +63,17 @@ void reference_collapsing(){
 void reference_collapsing2(){
 	commit(std::move(functionint), 3);
 }
+
+
+void use_rightref(int && rparam) {
+	//....
+}
+
+template<typename T>
+void use_tempref(T&& tparam) {
+	use_rightref(std::forward<T>(tparam));
+}
+
+void test_tempref() {
+	use_tempref(3);
+}

@@ -137,6 +137,7 @@ int main()
 	TestBindDemo();
 	reference_collapsing();
 	reference_collapsing2();
+	test_tempref();
 }
 
 
