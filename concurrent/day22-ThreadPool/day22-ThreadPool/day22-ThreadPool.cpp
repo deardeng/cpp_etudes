@@ -139,17 +139,17 @@ void TestThreadPoolSort() {
 
 int main()
 {
-    TestParallenForEach();
+ /*   TestParallenForEach();
     TestRecursiveForEach();
     TestSimpleThread();
     TestFutureThread();
 	TestNotifyThread();
 	TestQuickSort();
 	TestParrallenThreadPool();
-	TestBindDemo();
-	reference_collapsing();
-	reference_collapsing2();
-	test_tempref();
+	TestBindDemo();*/
+	//reference_collapsing();
+	//reference_collapsing2();
+	//test_tempref();
 	TestThreadPoolSort();
 }
 
