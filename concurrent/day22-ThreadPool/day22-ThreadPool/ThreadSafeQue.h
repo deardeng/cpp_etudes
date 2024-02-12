@@ -11,6 +11,7 @@ private:
 	{
 		std::shared_ptr<T> data;
 		std::unique_ptr<node> next;
+		node* prev;
 	};
 
 	std::mutex head_mutex;
@@ -162,11 +163,30 @@ public:
 			std::lock_guard<std::mutex> tail_lock(tail_mutex);
 			tail->data = new_data;
 			node* const new_tail = p.get();
+			new_tail->prev = tail;
+	
 			tail->next = std::move(p);
+		
 			tail = new_tail;
 		}
 
 		data_cond.notify_one();
+	}
+
+	bool try_steal(T& value) {
+		std::unique_lock<std::mutex> tail_lock(tail_mutex,std::defer_lock);
+		std::unique_lock<std::mutex>  head_lock(head_mutex, std::defer_lock);
+		std::lock(tail_lock, head_lock);
+		if (head.get() == tail)
+		{
+			return false;
+		}
+
+		node* prev_node = tail->prev;
+		value = std::move(*(prev_node->data));
+		tail = prev_node;
+		tail->next = nullptr;
+		return true;
 	}
 };
 

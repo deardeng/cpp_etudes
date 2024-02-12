@@ -152,6 +152,7 @@
     <ClInclude Include="ParallenThreadPool.h" />
     <ClInclude Include="QuickSort.h" />
     <ClInclude Include="SimpleThreadPool.h" />
+    <ClInclude Include="StealThreadPool.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="ThreadSafeQue.h" />
   </ItemGroup>

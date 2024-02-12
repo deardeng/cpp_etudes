@@ -7,6 +7,7 @@
 #include "NotifyThreadPool.h"
 #include "QuickSort.h"
 #include "binddemo.h"
+#include "ThreadSafeQue.h"
 
 void TestParallenForEach() {
 
@@ -137,20 +138,75 @@ void TestThreadPoolSort() {
 	std::cout << std::endl;
 }
 
+void TestStealPoolSort() {
+	std::list<int> nlist = { 6,1,0,5,2,9,11 };
+
+	auto sortlist = steal_thread_quick_sort<int>(nlist);
+
+	for (auto& value : sortlist) {
+		std::cout << value << " ";
+	}
+
+	std::cout << std::endl;
+}
+
+void TestSteal() {
+	threadsafe_queue<int> que;
+	std::thread t1([&que]() {
+		int index = 0;
+		for (; ; ) {
+			index++;
+			 que.push(index);
+			 std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			}
+		});
+
+	std::thread t3([&que]() {
+		for (; ; ) {
+			int value;
+			bool res = que.try_pop(value);
+			if (!res) {
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				continue;
+			}
+			std::cout << "pop out value is " << value << std::endl;
+		}
+		});
+
+	std::thread t2([&que]() {
+		for (; ; ) {
+			int value;
+			bool res = que.try_steal(value);
+			if (!res) {
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				continue;
+			}
+			std::cout << "steal out value is " << value << std::endl;
+		}
+	});
+
+
+	t1.join();
+	t2.join();
+	t3.join();
+}
+
 int main()
 {
- /*   TestParallenForEach();
-    TestRecursiveForEach();
-    TestSimpleThread();
-    TestFutureThread();
-	TestNotifyThread();
-	TestQuickSort();
-	TestParrallenThreadPool();
-	TestBindDemo();*/
+    //TestParallenForEach();
+    //TestRecursiveForEach();
+    //TestSimpleThread();
+    //TestFutureThread();
+	//TestNotifyThread();
+	//TestQuickSort();
+	//TestParrallenThreadPool();
+	//TestBindDemo();
 	//reference_collapsing();
 	//reference_collapsing2();
 	//test_tempref();
-	TestThreadPoolSort();
+	//TestThreadPoolSort();
+	//TestSteal();
+	TestStealPoolSort();
 }
 
 
