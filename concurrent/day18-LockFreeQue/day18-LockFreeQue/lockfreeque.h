@@ -211,6 +211,8 @@ public:
                 set_new_tail(old_tail, old_next);
             }
         }
+
+        construct_count++;
     }
 
 
@@ -240,7 +242,11 @@ public:
     }
 
     static std::atomic<int> destruct_count;
+    static std::atomic<int> construct_count;
 };
 
 template<typename T>
 std::atomic<int> lock_free_queue<T>::destruct_count = 0;
+
+template<typename T>
+std::atomic<int> lock_free_queue<T>::construct_count = 0;
