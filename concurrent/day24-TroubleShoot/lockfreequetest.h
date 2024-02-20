@@ -26,6 +26,9 @@ extern void TestCrushQue();
 
 extern void TestLeakQue();
 
+extern void TestLeakQueSingleThread();
+
+extern void TestLeakQueMultiPop();
 
 extern void TestLockFreeQueMultiPushPop2();
 

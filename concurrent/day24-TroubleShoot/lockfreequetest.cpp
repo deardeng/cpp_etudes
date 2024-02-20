@@ -41,8 +41,6 @@ void TestLeakQue() {
 		}
 		});
 
-
-
 	std::thread t2([&]() {
 		for (int i = 0; i < TESTCOUNT;) {
 			auto p = que.pop();
@@ -60,6 +58,57 @@ void TestLeakQue() {
 
 	assert(que.destruct_count == TESTCOUNT);
 
+}
+
+void TestLeakQueSingleThread() {
+	memoryleak_que<int>  que;
+	std::thread t1([&]() {
+		for (int i = 0; i < TESTCOUNT; i++) {
+			que.push(i);
+			std::cout << "push data is " << i << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+			auto p = que.pop();
+			if (p == nullptr) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::cout << "pop data is " << *p << std::endl;
+		}
+		});
+
+	t1.join();
+
+	assert(que.destruct_count == TESTCOUNT);
+}
+
+void TestLeakQueMultiPop() {
+	memoryleak_que<int>  que;
+	std::thread t1([&]() {
+		for (int i = 0; i < TESTCOUNT; i++) {
+			que.push(i);
+			std::cout << "push data is " << i << std::endl;
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+			auto p = que.pop();
+			if (p == nullptr) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::cout << "pop data is " << *p << std::endl;
+
+			auto p2 = que.pop();
+			if (p2 == nullptr) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			std::cout << "pop data is " << *p2 << std::endl;
+		}
+		});
+
+	t1.join();
+
+	assert(que.destruct_count == TESTCOUNT);
 }
 
 

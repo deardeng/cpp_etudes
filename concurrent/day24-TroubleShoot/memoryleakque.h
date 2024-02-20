@@ -217,8 +217,6 @@ public:
             node* const ptr = old_head.ptr;
             if (ptr == tail.load().ptr)
             {
-                //头尾相等说明队列为空，要减少内部引用计数
-              // ptr->release_ref();
                 return std::unique_ptr<T>();
             }
             //  ⇽---  2

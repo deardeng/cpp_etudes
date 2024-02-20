@@ -7,11 +7,12 @@ int main()
 {
 
 	//测试崩溃版本
-	TestCrushQue();
+	//TestCrushQue();
 
 	//测试内存泄露版本
 	//TestLeakQue();
-
+	//TestLeakQueSingleThread();
+	TestLeakQueMultiPop();
 
 	//TestLockFreeQue();
    // TestLockFreeQueBase();
