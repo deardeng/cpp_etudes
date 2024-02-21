@@ -10,17 +10,13 @@
 
 #define TESTCOUNT 10
 
-
 extern void TestLockFreeQueBase();
 
 extern void TestLockFreeQue();
 
-
 extern void TestLockFreeQueMultiPop();
 
-
 extern void TestLockFreeQueMultiPushPop();
-
 
 extern void TestCrushQue();
 
