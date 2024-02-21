@@ -105,6 +105,7 @@ private:
 
 class interruptible_thread
 {
+private:
     std::thread internal_thread;
     interrupt_flag* flag;
 public:

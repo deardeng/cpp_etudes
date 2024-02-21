@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "lockfreequetest.h"
+#include "deadlock.h"
 int main()
 {
 
@@ -12,7 +13,7 @@ int main()
 	//测试内存泄露版本
 	//TestLeakQue();
 	//TestLeakQueSingleThread();
-	TestLeakQueMultiPop();
+	//TestLeakQueMultiPop();
 
 	//TestLockFreeQue();
    // TestLockFreeQueBase();
@@ -20,6 +21,8 @@ int main()
 	//测试多个生产和多个消费线程
 	//TestLockFreeQueMultiPushPop();
 	//TestLockFreeQueMultiPushPop2();
+	//deadlockdemo();
+	lockdemo();
 }
 
 
