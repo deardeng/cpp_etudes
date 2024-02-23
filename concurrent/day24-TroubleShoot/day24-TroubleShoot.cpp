@@ -22,7 +22,14 @@ int main()
 	//TestLockFreeQueMultiPushPop();
 	//TestLockFreeQueMultiPushPop2();
 	//deadlockdemo();
-	lockdemo();
+	//lockdemo();
+	//reference_invalid();
+	//reference_sharedptr();
+	//shallow_copy();
+	//shallow_copy2();
+	//normal_copy();
+	TestProducerConsumer();
+	std::cout << "main exit" << std::endl;
 }
 
 
