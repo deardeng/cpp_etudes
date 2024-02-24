@@ -21,6 +21,9 @@
     <ClCompile Include="lockfreequetest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="deadlock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crushque.h">
@@ -33,6 +36,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="memoryleakque.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="deadlock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadSafeQue.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

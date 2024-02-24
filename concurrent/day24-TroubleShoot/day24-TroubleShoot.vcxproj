@@ -149,6 +149,7 @@
     <ClInclude Include="lockfreeque.h" />
     <ClInclude Include="lockfreequetest.h" />
     <ClInclude Include="memoryleakque.h" />
+    <ClInclude Include="ThreadSafeQue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

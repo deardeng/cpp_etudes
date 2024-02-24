@@ -28,7 +28,8 @@ int main()
 	//shallow_copy();
 	//shallow_copy2();
 	//normal_copy();
-	TestProducerConsumer();
+	//TestProducerConsumer();
+	TestSteal();
 	std::cout << "main exit" << std::endl;
 }
 

@@ -5,6 +5,9 @@
 #include <iostream>
 #include <queue>
 #include <functional>
+#include <windows.h> 
+#include <stdio.h> 
+#include "ThreadSafeQue.h"
 
 void deadlockdemo() {
 	std::mutex mtx;
@@ -178,19 +181,80 @@ void lockdemo() {
  }
 
  std::atomic<bool>  b_stop = false;
- void sig_handler(int sig)
- {
-	 if (sig == SIGINT || sig == SIGTERM)
-	 {
-		 b_stop = 0;
-	 }
- }
+
+
+  BOOL CtrlHandler(DWORD fdwCtrlType)
+  {
+	  switch (fdwCtrlType)
+	  {
+		  // Handle the CTRL-C signal. 
+	  case CTRL_C_EVENT:
+		  printf("Ctrl-C event\n\n");
+		  b_stop = true;
+		  return(TRUE);
+
+		  // CTRL-CLOSE: confirm that the user wants to exit. 
+	  case CTRL_CLOSE_EVENT:
+		  b_stop = true;
+		  printf("Ctrl-Close event\n\n");
+		  return(TRUE);
+
+	  case CTRL_SHUTDOWN_EVENT:
+		  b_stop = true;
+		  printf("Ctrl-Shutdown event\n\n");
+		  return FALSE;
+
+	  default:
+		  return FALSE;
+	  }
+  }
 
   void TestProducerConsumer()
- {
-	  signal(SIGINT, sig_handler);
+  {
+	  SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE);
 	  ProductConsumerMgr mgr;
 	  while (!b_stop) {
 		  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	  }
- }
+  }
+
+  void TestSteal() {
+	  threadsafe_queue<int> que;
+	  std::thread t1([&que]() {
+		  int index = 0;
+		  for (; ; ) {
+			  index++;
+			  que.push(index);
+			  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		  }
+		  });
+
+	  std::thread t3([&que]() {
+		  for (; ; ) {
+			  int value;
+			  bool res = que.try_pop(value);
+			  if (!res) {
+				  std::this_thread::sleep_for(std::chrono::seconds(1));
+				  continue;
+			  }
+			  std::cout << "pop out value is " << value << std::endl;
+		  }
+		  });
+
+	  std::thread t2([&que]() {
+		  for (; ; ) {
+			  int value;
+			  bool res = que.try_steal(value);
+			  if (!res) {
+				  std::this_thread::sleep_for(std::chrono::seconds(1));
+				  continue;
+			  }
+			  std::cout << "steal out value is " << value << std::endl;
+		  }
+		  });
+
+
+	  t1.join();
+	  t2.join();
+	  t3.join();
+  }
