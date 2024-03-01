@@ -8,6 +8,7 @@ my $filename = $ARGV[0] ;  # 文件名
 open(my $fh, "<", $filename) or die "无法打开文件 $filename: $!";
 
 my $previous_timestamp = "";
+my $all = 0;
 while (my $line = <$fh>) {
     chomp($line);
     # 2024-01-26 10:17:46,018 INFO (mysql-nio-pool-0|382) [InternalCatalog.createCloudPartitionWithIndices():3773] create tablets, dbId: 127080, tableId: 127088, tableName: income_statistics_service, partitionId: 133619, partitionName: p20240121, indexId: 127089
@@ -28,9 +29,11 @@ while (my $line = <$fh>) {
 
         my $time_difference = $curr_time - $prev_time;
         print "时间差: $time_difference 毫秒\n";
+        $all = $all + $time_difference;
     }
 
     $previous_timestamp = $current_timestamp;
 }
+print $all;
 
 close($fh);
