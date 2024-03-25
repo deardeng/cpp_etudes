@@ -1725,7 +1725,7 @@ sub get_entry_of_called_tree($$$) {
   my $name = $node->{name};
   my $file_info = $node->{file_info};
   if ($file_info) {
-    $file_info =~ s/:/ +/g;
+    # $file_info =~ s/:/ +/g;
     $file_info = "vim $file_info";
   }
   if (defined($common_idx)) {
@@ -1764,7 +1764,7 @@ sub get_entry_of_calling_tree($$$) {
   my $leaf = $node->{leaf};
 
   if ($file_info) {
-    $file_info =~ s/:/ +/g;
+    # $file_info =~ s/:/ +/g;
     $file_info = "vim $file_info";
   }
 
