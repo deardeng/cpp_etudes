@@ -142,6 +142,16 @@ sub file_newer_than_script($) {
   file_newer_than(+shift, get_path_of_script());
 }
 
+
+# 这段 Perl 代码定义了两个子函数：get_cached_or_run 和 get_cache_or_run_keyed。
+# get_cached_or_run 函数接受一个匿名子函数 $func、一个验证函数 $validate_func、一个缓存文件路径 $cached_file，以及其他可能的参数 @args。它的作用是检查缓存文件是否存在以及是否有效，如果有效则从缓存中获取结果，否则运行 $func 并将结果存储到缓存文件中。
+# 具体来说，它首先检查缓存文件的时间戳是否比脚本文件的时间戳更新，以确定缓存文件是否有效。如果有效，它将从缓存文件中检索结果，验证结果是否符合 $validate_func 的要求。如果验证通过，则返回缓存结果。
+# 如果缓存文件无效或验证不通过，则运行 $func 来获取新的结果。然后，将结果存储到缓存文件中，并返回结果。
+# get_cache_or_run_keyed 函数接受一个数组引用 $key、一个缓存文件路径 $file、一个匿名子函数 $func，以及其他可能的参数 @args。它的作用是根据给定的缓存键 $key 检查缓存文件，并获取相应的结果。
+# 具体来说，它首先检查 $key 是否是一个定义的数组引用。然后，将数组引用 $key 展开成一个数组 @key。接下来，将 @key 以空字符（\0）连接起来生成期望的键 $expect_key。
+# 然后，它定义了一个检查键是否匹配的闭包函数 $check_key。该闭包函数接受一个哈希引用作为参数，并检查其中的 cached_key 是否存在且与期望的键相匹配。
+# 最后，它调用 get_cached_or_run 函数，使用匿名子函数 { cached_key => $expect_key, cached_data => [ $func->(@args) ] } 作为 $func 参数，并通过 $check_key 函数进行验证。最终返回缓存数据的数组引用 @{$data->{cached_data}}。
+# 这些函数可以用于实现缓存机制，以提高重复计算的性能，并避免重复执行耗时的操作。
 sub get_cached_or_run(&$$;@) {
   my ($func, $validate_func, $cached_file, @args) = @_;
   if (file_newer_than_script($cached_file)) {
@@ -154,6 +164,13 @@ sub get_cached_or_run(&$$;@) {
   nstore [ @result ], $cached_file;
   return @result;
 }
+
+# 在Perl中，+ 符号用于创建一个匿名哈希引用（anonymous hash reference）。
+# 在代码片段中，+{ cached_key => $expect_key, cached_data => [ $func->(@args) ] } 使用了 + 符号来创建一个匿名哈希引用。这个哈希引用有两个键值对：cached_key 和 cached_data。
+# 键 cached_key 的值是 $expect_key，即期望的键值。
+# 键 cached_data 的值是 $func->(@args) 的结果，即调用匿名子函数 $func 并传入 @args 参数后的返回值。在这里，它是一个数组引用。
+# 使用 + 符号可以让Perl解析器在语法上将大括号内的内容解析为哈希引用，而不是代码块。这在某些语境中很有用，例如在函数调用中，可以直接传递匿名哈希引用作为参数。
+# 因此，+{ cached_key => $expect_key, cached_data => [ $func->(@args) ] } 创建了一个匿名哈希引用，作为 get_cached_or_run 函数中的 $func 参数的值。
 
 sub get_cache_or_run_keyed(\@$$;@) {
   my ($key, $file, $func, @args) = @_;
@@ -954,6 +971,34 @@ sub should_prune_subtree($$) {
   return ();
 }
 
+# 参数：
+#
+# $graph：表示整个图形结构或树的数据结构。
+# $node：表示当前节点。
+# $level：表示当前节点的深度级别。
+# $depth：表示限制的深度，即遍历的最大深度。
+# $path：存储已访问节点的路径。
+# $get_id_and_child：是一个回调函数，用于获取给定节点的唯一标识和子节点列表。
+# $install_child：是一个回调函数，用于将子节点安装到当前节点中。
+# $pruned：存储被剪枝的节点的缓存。
+# 代码逻辑：
+#
+# 通过调用 $get_id_and_child 回调函数获取节点的信息，包括 $matched（是否匹配）、$node_id（节点ID）和 @child（子节点列表）。
+# 将当前节点的高度设置为 1。
+# 如果 $node_id 未定义，表明获取节点信息失败，返回 undef。
+# 根据一些条件判断节点的类型并设置 leaf 属性。如果子节点数为 0，则节点类型为 "outermost"；如果深度等级超过或等于限制深度，则节点类型为 "deep"；如果节点已存在于路径中，则节点类型为 "recursive"。
+# 根据 $matched 的值决定返回节点或 undef。
+# 如果节点未被返回，继续处理子节点：
+# 创建 RAII 对象，用于在子树递归过程中维护深度级别和路径。
+# 递归调用 sub_tree 函数处理子节点，并将结果存储在 @child_nodes 数组中。
+# 过滤掉 @child_nodes 中的 undef 值。
+# 如果存在子节点，将它们安装到当前节点中，并根据子节点的最大高度更新当前节点的高度。
+# 如果 $pruned 存在，将当前节点缓存到 $pruned 哈希表中。
+# 返回当前节点。
+# 如果没有子节点，将空数组安装到当前节点中，并设置当前节点的高度为 1。
+# 如果 $pruned 存在，将当前节点的唯一名字（$unique_name）作为缓存键，并将当前节点存储到 $pruned 哈希表中。
+# 根据节点类型和其他条件，决定是否返回当前节点。
+# 总体而言，这段代码通过递归地遍历树结构并根据特定条件进行剪枝，构建了一个新的树结构，并将剪枝的节点缓存。这样的操作可以根据特定的需求对树结构进行剪枝和处理。
 sub sub_tree($$$$$$$$) {
   my ($graph, $node, $level, $depth, $path, $get_id_and_child, $install_child, $pruned) = @_;
 
