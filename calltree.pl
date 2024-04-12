@@ -1133,6 +1133,7 @@ sub remove_all_loops($) {
 }
 
 use List::Util qw/min max/;
+# lev_dist 子例程计算两个字符串之间的Levenshtein距离，即编辑距离。它使用动态规划算法实现，通过填充一个二维数组来记录子问题的解，最终返回最后一个元素作为距离值。
 sub lev_dist($$) {
   my ($a, $b) = @_;
   my ($a_len, $b_len) = (0, 0);
@@ -1169,6 +1170,7 @@ sub lev_dist($$) {
   return $d[-1][-1];
 }
 
+# lev_dist_score 子例程计算两个字符串之间的编辑距离得分。它首先检查字符串是否定义且非空，然后调用 lev_dist 子例程计算距离，并根据距离值返回相应的得分
 sub lev_dist_score($$) {
   my ($a, $b) = @_;
   return 0 unless defined($a) && defined($b) && length($a) > 0 && length($b) > 0;
@@ -1176,6 +1178,7 @@ sub lev_dist_score($$) {
   return $dist == -1 ? 0 : 1000 - $dist;
 }
 
+# substr_score 子例程计算一个字符串是否为另一个字符串的子串得分。它首先检查字符串是否定义且非空，然后将两个字符串转换为小写，并使用 index 函数检查是否存在子串关系。如果存在子串关系，返回固定得分1000，否则返回0?
 sub substr_score($$) {
   my ($a, $b) = @_;
   return 0 unless defined($a) && defined($b) && length($a) > 0 && length($b) > 0;
@@ -1189,11 +1192,22 @@ sub substr_score($$) {
   }
 }
 
+# abbr_score 子例程计算缩写匹配得分。它首先检查字符串是否定义且非空，然后将其中一个字符串转换为小写。它根据特定规则对另一个字符串进行处理，生成两个可能的缩写形式 $b0 和 $b1。然后分别调用 substr_score 子例程计算两个缩写形式与原字符串的得分，并返回较大的得分
 sub abbr_score($$) {
   my ($a, $b) = @_;
   return 0 unless defined($a) && defined($b) && length($a) > 0 && length($b) > 0;
   $a = lc $a;
+  # split //, $b：这将字符串 $b 拆分成一个字符数组。// 是一个空正则表达式，它会将字符串拆分为单个字符。
+  # grep {"A" le $_ && $_ le "Z"}：这是一个过滤操作，用于筛选出字符数组中满足条件的元素。在这里，只有满足条件 "A" le $_ && $_ le "Z" 的字符会被保留下来。此条件检查字符是否处于字母 A 到 Z 的范围内（包括 A 和 Z）。
+  # join "", ...：这将以空字符串作为分隔符，将过滤后的字符数组重新连接为一个字符串。
+  # lc：这是一个函数，用于将字符串转换为小写形式。
+  # 综合起来，这行代码的作用是将字符串 $b 中的大写字母提取出来，并将其转换为小写形式。具体操作是先将字符串拆分为单个字符，然后过滤出满足条件的大写字母，最后将它们重新连接为一个字符串并转换为小写形式。结果存储在变量 $b0 中。
   my $b0 = lc join "", grep {"A" le $_ && $_ le "Z"} split //, $b;
+  # split //, $b：这将字符串 $b 拆分成一个字符数组，与之前的代码相同。
+  # grep {my $chr = $_; all {$chr ne $_} qw/a e i o u/}：这是一个过滤操作，用于筛选出字符数组中满足条件的元素。在这里，只有满足条件的字符会被保留下来。条件是对于字符数组中的每个元素，都要检查它与字符串 qw/a e i o u/ 中的元素不相等。all 是一个子例程，它接受一个匿名子例程和一个列表，并检查列表中的所有元素是否都满足匿名子例程的条件。
+  # join "", ...：这将以空字符串作为分隔符，将过滤后的字符数组重新连接为一个字符串。
+  # lc：这是一个函数，用于将字符串转换为小写形式。
+  # 综合起来，这行代码的作用是将字符串 $b 中的非元音字母提取出来，并将它们转换为小写形式。具体操作是先将字符串拆分为单个字符，然后过滤出与字符串 qw/a e i o u/ 中的元素都不相等的字符，最后将它们重新连接为一个字符串并转换为小写形式。结果存储在变量 $b1 中
   my $b1 = lc join "", grep {my $chr = $_;
     all {$chr ne $_} qw/a e i o u/} split //, $b;
   my $score0 = 0;
@@ -1203,11 +1217,15 @@ sub abbr_score($$) {
   return max($score0, $score1);
 }
 
+# score 子例程计算一组评分规则对数据进行评分。它接受一个哈希引用 $data 和一组规则子例程 @rules 作为参数。默认情况下，如果没有规则提供，则返回0。它将每个规则子例程应用于数据，并返回最大的得分
 sub score(\%;@) {
+  # 在 score 子例程中，如果没有传递规则子例程 @rules，则默认使用 sub {0} 作为一个规则。这意味着如果没有提供任何规则，评分将始终为0。
+  # 匿名子例程允许您在需要时创建临时的、简单的子例程，而无需为其命名。在这里，使用 sub {0} 是一种默认行为，以确保代码在没有明确规则时仍能正常工作。
   my ($data, @rules) = (@_, sub {0});
   max(map {$_->($data)} @rules);
 }
 
+# default_score 子例程计算默认的评分。它接受一个哈希引用 $data 作为参数。在函数内部，定义了一组评分规则，包括针对前缀和范围、前缀和文件名的缩写、子串和编辑距离的规则。然后通过调用 score 子例程，并传递数据和规则，返回最终的得分
 sub default_score(\%) {
   my $data = shift;
 
@@ -1321,11 +1339,15 @@ sub search_called_tree($$$$$$) {
 
   foreach (@$match_lines) {push @{$match_lines{$_->[0]}}, [ $_->[1], $_->[2] ]}
   my @nodes = values %nodes;
-  # p(@nodes);
+  say "before";
+  p(@nodes);
   @nodes = grep {
     # eliminate the function definition if the name_pattern is just the proper name of the function.
+    say "dx test 1";
     p($name_pattern);
     p($_->{name});
+    p($_->{simple_name});
+    say "dx test 2";
     $name_pattern ne $_->{name} && $name_pattern ne $_->{simple_name}
   } grep {
     my $n = $_;
@@ -1338,6 +1360,7 @@ sub search_called_tree($$$$$$) {
       any {$n->{start_lineno} <= $_ && $_ <= $n->{end_lineno}} @lineno;
     }
   } @nodes;
+  say "after";
   p(@nodes);
 
   my @match_and_nodes = map {
@@ -1349,6 +1372,8 @@ sub search_called_tree($$$$$$) {
     } @nodes;
     [ $match_line, [ @match_nodes ] ];
   } @$match_lines;
+  p(@match_and_nodes);
+  p(@$match_lines);
 
   my $create_subtree = sub($) {
     my ($match_line, $match_nodes) = @{$_[0]};

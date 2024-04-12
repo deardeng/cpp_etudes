@@ -16,7 +16,6 @@ build
 cmake-build-debug
 debug-build
 build_debug
-*debug*
 *build*
 third-party/jemalloc*
 llvm_install
