@@ -36,6 +36,13 @@ use strict;
 use Data::Dumper;
 use List::Util qw/max/;
 use Storable qw/freeze thaw nstore retrieve/;
+use 5.010;
+
+use Data::Printer {
+    index => 1,     # 不要输出数组索引
+    hash_separator => '=> ',  # hash元素的key和value分隔符
+    quote_keys     => 'auto',  # 自动加引号
+};
 
 sub red_color($) {
   my ($msg) = @_;
@@ -1246,6 +1253,38 @@ sub unified_called_tree($$$$) {
 sub calling_tree($$$$$$) {
   my ($calling_graph, $name, $func_match_rule, $file_match_rule, $depth, $uniques) = @_;
 
+  # {
+  #     branch_type => "callees",
+  #     call        => "getAllDomains",
+  #     callees     => [
+  #         [0] {
+  #             call  => "readLock",
+  #             name  => "readLock",
+  #             prefix=> undef,
+  #             seq   => 0
+  #         },
+  #         [1] {
+  #             call  => "getAllDomains",
+  #             name  => "getAllDomains",
+  #             prefix=> undef,
+  #             seq   => 1
+  #         },
+  #         [2] {
+  #             call  => "readUnlock",
+  #             name  => "readUnlock",
+  #             prefix=> undef,
+  #             seq   => 2
+  #         }
+  #     ],
+  #     end_lineno  => 1183,
+  #     file        => "java/org/apache/doris/mysql/privilege/Auth.java",
+  #     file_info   => "java/org/apache/doris/mysql/privilege/Auth.java:1176",
+  #     filename    => "Auth",
+  #     name        => "getAllDomains",
+  #     scope       => undef,
+  #     simple_name => "getAllDomains",
+  #     start_lineno=> 1176
+  # }
   my $new_variant_node = sub($) {
     my ($node) = @_;
     my $call = $node->{name};
@@ -1284,6 +1323,16 @@ sub calling_tree($$$$$$) {
       file_info   => "",
       branch_type => 'variants',
     };
+    # {
+    #     branch_type=> "variants",
+    #     call       => "UserIdentity",
+    #     file_info  => "",
+    #     name       => "UserIdentity",
+    #     prefix     => undef,
+    #     seq        => 0,
+    #     simple_name=> "UserIdentity"
+    # }
+    p $node;
     return $node;
   };
 
@@ -1676,6 +1725,7 @@ sub group_by(&;@) {
 }
 
 sub outermost_tree($$$) {
+  p (@_);
   my ($name, $func_match_rule, $file_match_rule) = @_;
   my %names = map {
     $_ => 1
@@ -1684,6 +1734,7 @@ sub outermost_tree($$$) {
   } grep {
     ($_ =~ /$name/)
   } @$Global_calling_names;
+  # print Dumper(@$Global_calling_names);
 
   #my @names = grep {!exists $called->{$_}} sort {$a cmp $b} keys %names;
   my @names = sort {$a cmp $b} keys %names;

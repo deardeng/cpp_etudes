@@ -1860,7 +1860,8 @@ sub get_entry_of_calling_tree($$$) {
         $name = "\e[91;33;1m+ $call\e[m";
       }
       elsif ($leaf eq "outermost") {
-        #$name = "\e[95;31;1m$call\e[m\e[91;38;2m\t[out-of-tree]\e[m";
+        # ct 'main' 'Pipeline' 0 1 3
+        # $name = "\e[95;31;1m$call\e[m\e[91;38;2m\t[out-of-tree]\e[m";
         $name = "\e[95;31;1m$call\e[m";
       }
       elsif ($leaf eq "recursive") {
