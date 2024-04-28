@@ -183,7 +183,7 @@ public:
             {
                 counted_node_ptr old_next;
                 counted_node_ptr now_next = old_tail.ptr->next.load();
-                //⇽---  7
+                //⇽---  7 链接新的节点
                 if (!old_tail.ptr->next.compare_exchange_strong(
                     old_next, new_next))
                 {
