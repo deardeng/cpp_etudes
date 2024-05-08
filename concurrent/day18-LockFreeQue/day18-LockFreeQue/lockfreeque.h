@@ -91,6 +91,9 @@ private:
         node* const current_tail_ptr = old_tail.ptr;
         // ⇽---  2  此处仅有一个线程能设置tail为new_tail，失败的会更新old_tail为tail的新值
         //  为防止失败的线程重试导致tail被再次更新所以添加了后面的&&判断
+		//如果tail和old_tail不等说明引用计数不同或者tail已经被移动，如果tail已经被移动那么old_tail的ptr和current_tail_ptr不同，则可以直接退出。
+		//所以一旦tail被设置为new_tail，那么另一个线程在重试时判断tail和old_tail不等，会修改old_tail, 此时old_tail已经和current_tail不一致了，所以没必要再重试。
+       //如不加后续判断， 会造成重复设置newtail，引发多插入节点的问题。
         while (!tail.compare_exchange_weak(old_tail, new_tail) &&
             old_tail.ptr == current_tail_ptr);
         // ⇽---  3
