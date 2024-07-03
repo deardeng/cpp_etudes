@@ -48,7 +48,6 @@ public:
 		_producer = std::thread([this]() {
 			int data = 0;
 			while (!b_stop) {
-				std::this_thread::sleep_for(std::chrono::seconds(5));
 				std::unique_lock<std::mutex> lock(_mtx);
 				_producer_cv.wait(lock, [this]() {
 					if (b_stop) {

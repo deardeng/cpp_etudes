@@ -175,7 +175,9 @@ public:
             if (old_tail.ptr->data.compare_exchange_strong(
                 old_data, new_data.get()))
             {
-                counted_node_ptr old_next = { 0 };
+                counted_node_ptr old_next;
+                old_next.external_count = 0;
+                old_next.ptr = nullptr;
                 counted_node_ptr now_next = old_tail.ptr->next.load();
                 //⇽---  7
                 if (!old_tail.ptr->next.compare_exchange_strong(

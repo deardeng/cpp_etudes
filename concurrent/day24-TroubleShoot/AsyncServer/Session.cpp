@@ -15,7 +15,7 @@ void Session::handle_read(const boost::system::error_code& error, size_t bytes_t
 		cout << "server receive data is " << _data << endl;
 
 		//读完再次注册
-		/*_socket.async_read_some(boost::asio::buffer(_data, max_length), std::bind(&Session::handle_read,
+	/*	_socket.async_read_some(boost::asio::buffer(_data, max_length), std::bind(&Session::handle_read,
 			this, placeholders::_1, placeholders::_2));*/
 
 		//在发送
