@@ -260,7 +260,7 @@ main(int argc, char* argv[])
 			return EXIT_FAILURE;
 		}*/
 
-		auto const address = net::ip::make_address("127.0.0.1");
+		auto const address = net::ip::make_address("0.0.0.0");
 		unsigned short port = static_cast<unsigned short>(8080);
 
 		net::io_context ioc{ 1 };
