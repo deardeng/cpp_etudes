@@ -77,7 +77,7 @@ private:
 
 	hazard_pointer_stack(const hazard_pointer_stack&) = delete;
 	hazard_pointer_stack& operator = (const hazard_pointer_stack&) = delete;
-	std::atomic<node*> head;
+	std::atomic<node*> head = nullptr;
 	std::atomic<data_to_reclaim*>  nodes_to_reclaim;
 public:
 	hazard_pointer_stack() {}

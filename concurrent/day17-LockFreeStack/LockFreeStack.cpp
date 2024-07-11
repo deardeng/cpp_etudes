@@ -77,6 +77,22 @@ void TestHazardPointer() {
         }
         });
 
+    std::thread t4([&]() {
+        for (int i = 0; i < 20000; i++) {
+            hazard_stack.push(i);
+            std::cout << "push data " << i << " success!" << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+    });
+
+    std::thread t5([&]() {
+        for (int i = 0; i < 20000; i++) {
+            hazard_stack.push(i);
+            std::cout << "push data " << i << " success!" << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+    });
+
     std::thread t2([&]() {
         for (int i = 0; i < 10000;) {
             auto head = hazard_stack.pop();
@@ -108,6 +124,8 @@ void TestHazardPointer() {
     t1.join();
     t2.join();
     t3.join();
+    t4.join();
+    t5.join();
 
     assert(rmv_set.size() == 20000);
 }
@@ -275,7 +293,7 @@ int main()
 {
     //TestLockFreeStack();
     //TestHazardPointer();
-   TestRefCountStack();
+    TestRefCountStack();
 	//TestSingleRefStack();
 	//TestReleaseSeq();
 	//TestReleaseSeq2();

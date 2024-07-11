@@ -5,6 +5,7 @@
 #include <mutex>
 #include <map>
 #include <shared_mutex>
+#include <thread>
 
 //unique_lock 基本用法
 std::mutex mtx;

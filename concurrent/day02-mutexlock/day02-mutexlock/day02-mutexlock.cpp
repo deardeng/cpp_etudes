@@ -439,6 +439,7 @@ int main()
 {
 	//test_lock();
 	//test_threadsafe_stack1();
+    test_hierarchy_lock();
     std::cout << "Hello World!\n";
 }
 

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+project(day02-mutexlock)
+message("Source code:" ${SRCS})
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_executable(${PROJECT_NAME} day02-mutexlock.cpp)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")

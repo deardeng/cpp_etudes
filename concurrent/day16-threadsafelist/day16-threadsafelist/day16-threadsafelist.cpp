@@ -6,7 +6,7 @@
 #include "tailpushlist.h"
 #include "MyClass.h"
 #include <set>
-#include "tailpushlist.h"
+#include <thread>
 
 std::set<int> removeSet;
 void TestThreadSafeList()

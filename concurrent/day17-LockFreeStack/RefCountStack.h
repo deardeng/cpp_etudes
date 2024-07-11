@@ -61,7 +61,7 @@ public:
 					delete  ptr;
 				}
 				return res;
-			} else if (ptr->internal_count.fetch_add(-1, std::memory_order_acquire) == 1) { //5
+			} else if (ptr->internal_count.fetch_add(-1, std::memory_order_relaxed) == 1) { //5
 				//如果当前线程操作的head节点已经被别的线程更新，则减少内部引用计数
 				//当前线程减少内部引用计数，返回之前值为1说明指针仅被当前线程引用
 				ptr->internal_count.load(std::memory_order_acquire);
