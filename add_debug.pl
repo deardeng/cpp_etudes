@@ -56,7 +56,9 @@ my $change_dockerfile = sub(@) {
     # sysctl -p
     # push @$lines, "\nRUN echo \"kernel.core_pattern = /opt/apache-doris/core_dump/core.%e.%p.%t\">/etc/sysctl.conf";
     # push @$lines, "\nRUN sysctl -p\n";
-    push @$lines, "\nRUN rm -fr /usr/bin/perf; ln -s /usr/bin/perf_5.10 /usr/bin/perf\n"
+    push @$lines, "\nRUN rm -fr /usr/bin/perf; ln -s /usr/bin/perf_5.10 /usr/bin/perf\n";
+    push @$lines, "\nRUN groupadd -g 1003 dengxin && useradd -u 1003 -g dengxin -m dengxin\n";
+    push @$lines, "\nRUN chown -R dengxin:dengxin /opt\n";
 };
 
 change_file("Dockerfile", $change_dockerfile);
@@ -64,6 +66,8 @@ change_file("Dockerfile", $change_dockerfile);
 my $change_cluster_file = sub {
     my ($lines) = @_;
     my $fe_debug_port = 8899;
+    my $tab = ' ' x 4;
+    my $tab3 = ' ' x 3;
     foreach my $line (@$lines) {
         if ($line =~ qr(volumes = \[)) {
             $line = $line."            \"{}:{}/{}\".format(os.path.join(self.get_path(),
@@ -76,6 +80,7 @@ my $change_cluster_file = sub {
         $line =~ s#^.*=excludes=org.apache.*\R*##;
         $line =~ s#^.*:com.aliyun.*\R*##;
         $line =~ s#"output=file.*$##;
+        $line =~ s#(return content)#if self.node_type() != Node.TYPE_FDB:\n$tab$tab$tab3 content["user"] = "1003:1003"\n$tab$tab$1#;
 
         $line =~ s#(return \[FE_HTTP_PORT, FE_EDITLOG_PORT, FE_RPC_PORT, FE_QUERY_PORT)\]#$1, $fe_debug_port\]#
     }
