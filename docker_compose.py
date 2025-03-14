@@ -7,6 +7,7 @@ import os
 import threading
 from colorama import Fore, Style, init
 import argparse
+import pexpect
 
 # 初始化 colorama
 init(autoreset=True)
@@ -17,6 +18,28 @@ USERNAME = 'dengxin'
 
 # 全局变量
 is_cloud_branch = False
+
+def execute_remote_script(command):
+    """通过 pexpect 连接到远程机器并执行 shell 脚本"""
+    print(f"Attempting to connect to {DEV_MACHINE} as {USERNAME}...")
+    try:
+        # 设置环境变量以确保使用 UTF-8 编码
+        os.environ['LANG'] = 'en_US.UTF-8'
+        
+        # 使用 pexpect 连接到远程机器
+        child = pexpect.spawn(f'ssh {USERNAME}@{DEV_MACHINE} {command}; echo "exit"')
+        
+        while True:
+            s = child.readline().decode('utf-8')
+            print(s, end='')
+            if s.startswith('Confirm ?  y/n:'):
+                user_input = input('remote need Confirm ?  y/n: \n')
+                child.sendline(user_input)
+            if s.startswith('exit'):
+                break
+
+    except Exception as e:
+        print(f"Failed to connect or execute command: {e}")
 
 def ssh_exec_command_base(command, user_input=None):
     """通过 SSH 连接到远程机器并执行命令"""
@@ -127,7 +150,7 @@ def setup(branch):
     full_command = f"export LOCAL_DORIS_PATH={DEV_HOME}; python /mnt/disk2/dengxin/apache_doris/docker/runtime/doris-compose/doris-compose.py {command}"
     
     if is_cloud_branch:
-        ssh_exec_command_with_y(full_command)
+        execute_remote_script(full_command)
     else:
         ssh_exec_command(full_command)
 
